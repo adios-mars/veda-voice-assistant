@@ -30,6 +30,7 @@ wheels/
 # Audio recordings & temporary state files
 audio/*.wav
 audio/*.mp3
+audio/*.ogg
 conv.txt
 status.txt
 
