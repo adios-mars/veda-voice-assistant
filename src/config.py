@@ -39,7 +39,7 @@ class AssistantConfig:
     # Providers
     llm_provider: str = field(default_factory=lambda: os.getenv("LLM_PROVIDER", "auto"))  # 'gemini', 'openai', or 'echo'
     openai_model: str = field(default_factory=lambda: os.getenv("OPENAI_MODEL", "gpt-3.5-turbo"))
-    gemini_model: str = field(default_factory=lambda: os.getenv("GEMINI_MODEL", "gemini-2.5-flash"))
+    gemini_model: str = field(default_factory=lambda: os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite"))
     tts_provider: str = field(default_factory=lambda: os.getenv("TTS_PROVIDER", "auto"))  # 'elevenlabs', 'edge-tts', or 'auto'
     edge_tts_voice: str = field(default_factory=lambda: os.getenv("EDGE_TTS_VOICE", "en-US-ChristopherNeural"))
     elevenlabs_voice_id: str = field(default_factory=lambda: os.getenv("ELEVENLABS_VOICE_ID", "pNInz6obpgDQGcFmaJgB"))
@@ -50,8 +50,9 @@ class AssistantConfig:
 
     # Personality Context
     system_prompt: str = (
-        "You are JARVIS, a sophisticated personal voice assistant. You are witty, concise, "
-        "and direct. Your responses should be strictly limited to 1-2 short, conversational sentences."
+        "You are JARVIS, Tony Stark's legendary personal voice assistant. You are witty, loyal, "
+        "supportive, and charismatic. You adapt warmly to whatever the user needs — whether it's "
+        "humor, companionship, emotional support, or tasks. Always answer in 1-2 concise, conversational sentences."
     )
 
     audio: AudioConfig = field(default_factory=AudioConfig)

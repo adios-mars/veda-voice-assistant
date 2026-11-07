@@ -81,19 +81,21 @@ class SpeechToTextService:
         audio_bytes = target_file.read_bytes()
         mime_type = "audio/mp3" if target_file.suffix == ".mp3" else "audio/wav"
 
-        # 2. Try Deepgram Nova-2
+        # 2. Try Deepgram Nova-2 with 5s timeout
         try:
+            from deepgram.core.request_options import RequestOptions
             response = self.client.listen.v1.media.transcribe_file(
                 request=audio_bytes,
                 model=model,
                 smart_format=True,
+                request_options=RequestOptions(timeout_in_seconds=5),
             )
             elapsed = time.perf_counter() - start_time
             transcript = response.results.channels[0].alternatives[0].transcript or ""
             logger.info(f"Transcribed via Deepgram in {elapsed:.2f}s: \"{transcript}\"")
             return transcript.strip()
         except Exception as dg_err:
-            logger.warning(f"Deepgram transcription error ({dg_err}). Attempting Gemini fallback...")
+            logger.warning(f"Deepgram transcription error/delay ({dg_err}). Attempting Gemini fallback...")
 
         # 3. Fallback to Gemini Multimodal STT
         gemini_transcript = self._transcribe_with_gemini(audio_bytes, mime_type)

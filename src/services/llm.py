@@ -48,39 +48,77 @@ class OpenAILLM(BaseLLM):
 
 
 class GeminiLLM(BaseLLM):
-    """Google Gemini implementation (free tier via AI Studio key)."""
+    """Google Gemini implementation with automatic multi-model failover across quota tiers."""
+
+    FALLBACK_MODELS = [
+        "gemini-3.5-flash-lite",
+        "gemini-3.1-flash-lite",
+        "gemma-4-26b-a4b-it",
+        "gemini-2.5-flash",
+    ]
 
     def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
         from google import genai
         self.api_key = api_key or config.gemini_api_key
-        self.model = model or config.gemini_model
+        initial_model = model or config.gemini_model
         if not self.api_key or self.api_key.startswith("your_"):
             raise ValueError("Valid GEMINI_API_KEY is required in .env")
         self._client = genai.Client(
             api_key=self.api_key,
             http_options={"api_version": "v1beta"}
         )
-        # Persistent chat session keeps conversation context across turns
-        self._chat = self._client.chats.create(
-            model=self.model,
-            config={"system_instruction": config.system_prompt},
-        )
-        logger.info(f"Gemini LLM initialised with model '{self.model}'.")
+        # Order model list prioritizing initial_model
+        self._models = [initial_model] + [m for m in self.FALLBACK_MODELS if m != initial_model]
+        self._current_model_idx = 0
+        self._chat = None
+        self._current_model = None
+        self._init_chat(self._models[0])
+
+    def _init_chat(self, model_name: str):
+        try:
+            self._chat = self._client.chats.create(
+                model=model_name,
+                config={"system_instruction": config.system_prompt},
+            )
+            self._current_model = model_name
+            logger.info(f"Gemini LLM active with model '{model_name}'.")
+        except Exception as e:
+            logger.warning(f"Could not initialize chat on {model_name}: {e}")
+            self._chat = None
 
     def generate_reply(self, history: List[Dict[str, str]], prompt: str) -> str:
         import re
         start = time.perf_counter()
-        try:
-            response = self._chat.send_message(prompt)
-            raw = response.text or ""
-            # Strip markdown formatting like **bold**, *italic*, # headings
-            content = re.sub(r"[\*#_`]", "", raw).strip()
-            elapsed = time.perf_counter() - start
-            logger.info(f"Gemini reply in {elapsed:.2f}s: \"{content}\"")
-            return content
-        except Exception as e:
-            logger.error(f"Gemini API error during generation: {e}")
-            return "I apologize, sir. I experienced a momentary communication disruption."
+
+        for offset in range(len(self._models)):
+            idx = (self._current_model_idx + offset) % len(self._models)
+            model_name = self._models[idx]
+
+            try:
+                if self._current_model != model_name or self._chat is None:
+                    self._init_chat(model_name)
+                    if self._chat is None:
+                        continue
+
+                response = self._chat.send_message(prompt)
+                raw = response.text or ""
+                # Strip markdown symbols so speech synthesis is clean and natural
+                content = re.sub(r"[\*#_`]", "", raw).strip()
+                elapsed = time.perf_counter() - start
+                logger.info(f"Gemini reply via {model_name} in {elapsed:.2f}s: \"{content}\"")
+                # Remember working model index
+                self._current_model_idx = idx
+                return content
+            except Exception as e:
+                err_msg = str(e)
+                if any(code in err_msg for code in ["429", "503", "RESOURCE_EXHAUSTED", "UNAVAILABLE"]):
+                    logger.warning(f"Model '{model_name}' hit quota/busy spike ({err_msg[:60]}...). Switching to next model...")
+                    continue
+                else:
+                    logger.error(f"Gemini error with {model_name}: {e}")
+                    continue
+
+        return "I apologize, sir. I experienced a momentary communication disruption."
 
 
 class EchoFallbackLLM(BaseLLM):
