@@ -34,10 +34,12 @@ class AssistantConfig:
     deepgram_api_key: str = field(default_factory=lambda: os.getenv("DEEPGRAM_API_KEY", ""))
     openai_api_key: str = field(default_factory=lambda: os.getenv("OPENAI_API_KEY", ""))
     elevenlabs_api_key: str = field(default_factory=lambda: os.getenv("ELEVENLABS_API_KEY", ""))
+    gemini_api_key: str = field(default_factory=lambda: os.getenv("GEMINI_API_KEY", ""))
 
     # Providers
-    llm_provider: str = field(default_factory=lambda: os.getenv("LLM_PROVIDER", "openai"))  # 'openai' or 'echo'
+    llm_provider: str = field(default_factory=lambda: os.getenv("LLM_PROVIDER", "auto"))  # 'gemini', 'openai', or 'echo'
     openai_model: str = field(default_factory=lambda: os.getenv("OPENAI_MODEL", "gpt-3.5-turbo"))
+    gemini_model: str = field(default_factory=lambda: os.getenv("GEMINI_MODEL", "gemini-2.0-flash"))
     tts_provider: str = field(default_factory=lambda: os.getenv("TTS_PROVIDER", "auto"))  # 'elevenlabs', 'edge-tts', or 'auto'
     edge_tts_voice: str = field(default_factory=lambda: os.getenv("EDGE_TTS_VOICE", "en-US-ChristopherNeural"))
     elevenlabs_voice_id: str = field(default_factory=lambda: os.getenv("ELEVENLABS_VOICE_ID", "pNInz6obpgDQGcFmaJgB"))

@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 import time
 from typing import List, Dict, Optional
 
-import openai
 from src.config import config
 from src.logger import get_logger
 
@@ -23,11 +22,12 @@ class OpenAILLM(BaseLLM):
     """OpenAI GPT implementation."""
 
     def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
+        import openai as _openai
         self.api_key = api_key or config.openai_api_key
         self.model = model or config.openai_model
         if not self.api_key or self.api_key.startswith("your_"):
             raise ValueError("Valid OPENAI_API_KEY is required in .env")
-        self.client = openai.Client(api_key=self.api_key)
+        self.client = _openai.Client(api_key=self.api_key)
 
     def generate_reply(self, history: List[Dict[str, str]], prompt: str) -> str:
         messages = [{"role": "system", "content": config.system_prompt}]
@@ -47,11 +47,37 @@ class OpenAILLM(BaseLLM):
         return content.strip()
 
 
+class GeminiLLM(BaseLLM):
+    """Google Gemini implementation (free tier via AI Studio key)."""
+
+    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
+        from google import genai
+        self.api_key = api_key or config.gemini_api_key
+        self.model = model or config.gemini_model
+        if not self.api_key or self.api_key.startswith("your_"):
+            raise ValueError("Valid GEMINI_API_KEY is required in .env")
+        self._client = genai.Client(api_key=self.api_key)
+        # Persistent chat session keeps conversation context across turns
+        self._chat = self._client.chats.create(
+            model=self.model,
+            config={"system_instruction": config.system_prompt},
+        )
+        logger.info(f"Gemini LLM initialised with model '{self.model}'.")
+
+    def generate_reply(self, history: List[Dict[str, str]], prompt: str) -> str:
+        start = time.perf_counter()
+        response = self._chat.send_message(prompt)
+        elapsed = time.perf_counter() - start
+        content = response.text.strip()
+        logger.info(f"Gemini reply in {elapsed:.2f}s: \"{content}\"")
+        return content
+
+
 class EchoFallbackLLM(BaseLLM):
     """Simulated smart response provider when no external LLM API key is present."""
 
     def generate_reply(self, history: List[Dict[str, str]], prompt: str) -> str:
-        logger.warning("Using Fallback LLM (no OpenAI API key configured).")
+        logger.warning("No LLM API key configured — add GEMINI_API_KEY to .env for real AI responses.")
         p = prompt.lower()
         if "hello" in p or "hi" in p:
             return "Good day! All systems online and operational. How can I assist you, sir?"
@@ -62,11 +88,26 @@ class EchoFallbackLLM(BaseLLM):
         return f"Understood, sir. You said: '{prompt}'. Standing by for your command."
 
 
+def _is_placeholder(key: str) -> bool:
+    """Returns True if the key looks like a template placeholder, not a real credential."""
+    return not key or key.startswith("your_") or key.endswith("...") or key == "sk-proj-..."
+
+
 def get_llm_service() -> BaseLLM:
-    """Factory creating the appropriate LLM service instance."""
-    if config.openai_api_key and not config.openai_api_key.startswith("your_"):
+    """Factory: Gemini (free) → OpenAI → Echo fallback."""
+    # 1. Try Google Gemini (free tier)
+    if not _is_placeholder(config.gemini_api_key):
+        try:
+            return GeminiLLM()
+        except Exception as e:
+            logger.warning(f"Gemini init failed ({e}), trying OpenAI...")
+
+    # 2. Try OpenAI
+    if not _is_placeholder(config.openai_api_key):
         try:
             return OpenAILLM()
         except Exception as e:
-            logger.warning(f"Could not initialize OpenAI ({e}), using Fallback.")
+            logger.warning(f"OpenAI init failed ({e}), falling back to echo.")
+
+    # 3. Echo fallback (no real AI)
     return EchoFallbackLLM()
