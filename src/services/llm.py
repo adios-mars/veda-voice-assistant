@@ -68,12 +68,19 @@ class GeminiLLM(BaseLLM):
         logger.info(f"Gemini LLM initialised with model '{self.model}'.")
 
     def generate_reply(self, history: List[Dict[str, str]], prompt: str) -> str:
+        import re
         start = time.perf_counter()
-        response = self._chat.send_message(prompt)
-        elapsed = time.perf_counter() - start
-        content = response.text.strip()
-        logger.info(f"Gemini reply in {elapsed:.2f}s: \"{content}\"")
-        return content
+        try:
+            response = self._chat.send_message(prompt)
+            raw = response.text or ""
+            # Strip markdown formatting like **bold**, *italic*, # headings
+            content = re.sub(r"[\*#_`]", "", raw).strip()
+            elapsed = time.perf_counter() - start
+            logger.info(f"Gemini reply in {elapsed:.2f}s: \"{content}\"")
+            return content
+        except Exception as e:
+            logger.error(f"Gemini API error during generation: {e}")
+            return "I apologize, sir. I experienced a momentary communication disruption."
 
 
 class EchoFallbackLLM(BaseLLM):
