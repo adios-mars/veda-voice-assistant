@@ -56,7 +56,10 @@ class GeminiLLM(BaseLLM):
         self.model = model or config.gemini_model
         if not self.api_key or self.api_key.startswith("your_"):
             raise ValueError("Valid GEMINI_API_KEY is required in .env")
-        self._client = genai.Client(api_key=self.api_key)
+        self._client = genai.Client(
+            api_key=self.api_key,
+            http_options={"api_version": "v1beta"}
+        )
         # Persistent chat session keeps conversation context across turns
         self._chat = self._client.chats.create(
             model=self.model,
