@@ -2,6 +2,7 @@
 from abc import ABC, abstractmethod
 import asyncio
 from pathlib import Path
+import subprocess
 import time
 from typing import Optional, Union
 
@@ -59,13 +60,27 @@ class EdgeTTS(BaseTTS):
     def synthesize(self, text: str, output_path: Union[str, Path]) -> Path:
         import edge_tts
         target = Path(output_path)
+        temp_mp3 = target.with_suffix(".mp3")
         start = time.perf_counter()
 
         async def _run():
             communicate = edge_tts.Communicate(text, self.voice)
-            await communicate.save(str(target))
+            await communicate.save(str(temp_mp3))
 
         asyncio.run(_run())
+
+        # Convert MP3 to true standard PCM WAV for native Linux audio servers (PipeWire / ALSA)
+        try:
+            subprocess.run(
+                ["ffmpeg", "-y", "-i", str(temp_mp3), str(target)],
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        except Exception:
+            # Fallback: copy file
+            temp_mp3.rename(target)
+
         elapsed = time.perf_counter() - start
         logger.info(f"Edge-TTS synthesis ({self.voice}) complete in {elapsed:.2f}s")
         return target

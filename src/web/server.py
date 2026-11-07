@@ -335,9 +335,14 @@ class DashboardRequestHandler(SimpleHTTPRequestHandler):
 
 def run_server(host: str = config.web_host, port: int = config.web_port):
     """Starts the dashboard server."""
-    server = HTTPServer((host, port), DashboardRequestHandler)
-    logger.info(f"Dashboard available at http://localhost:{port}")
     try:
+        server = HTTPServer((host, port), DashboardRequestHandler)
+        logger.info(f"Dashboard available at http://localhost:{port}")
         server.serve_forever()
+    except OSError as e:
+        if e.errno == 98:
+            logger.info(f"Dashboard is already active on http://localhost:{port}")
+        else:
+            logger.error(f"Failed to start dashboard: {e}")
     except KeyboardInterrupt:
         logger.info("Stopping dashboard server.")
