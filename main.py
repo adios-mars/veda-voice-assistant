@@ -24,6 +24,11 @@ def parse_args():
         help="Run only the voice assistant without launching web dashboard.",
     )
     parser.add_argument(
+        "--no-browser",
+        action="store_true",
+        help="Do not auto-open the dashboard screen in default web browser.",
+    )
+    parser.add_argument(
         "--test-mic",
         action="store_true",
         help="Run a standalone microphone diagnostic test.",
@@ -50,10 +55,18 @@ def main():
         run_server()
         return
 
-    # 3. Default: Voice Assistant (with background Web Dashboard enabled by default)
+    # 3. Default: Voice Assistant with background Tactical HUD
     if not args.no_web:
         web_thread = threading.Thread(target=run_server, daemon=True)
         web_thread.start()
+
+        if not args.no_browser:
+            def _launch_browser():
+                import time
+                import webbrowser
+                time.sleep(0.6)
+                webbrowser.open(f"http://localhost:{config.web_port}")
+            threading.Thread(target=_launch_browser, daemon=True).start()
 
     # Verify credentials
     if not config.validate_keys():
