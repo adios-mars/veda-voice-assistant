@@ -37,21 +37,26 @@ class JarvisAssistant:
 
     def record_and_transcribe(self) -> Optional[str]:
         """Listens and transcribes user utterance."""
-        self.state.set_state(AssistantState.LISTENING)
-        audio_file = self.recorder.record_until_silence()
+        try:
+            self.state.set_state(AssistantState.LISTENING)
+            audio_file = self.recorder.record_until_silence()
 
-        self.state.set_state(AssistantState.PROCESSING)
-        transcript = self.stt.transcribe(audio_file)
-        if not transcript:
-            logger.info("No speech detected.")
+            self.state.set_state(AssistantState.PROCESSING)
+            transcript = self.stt.transcribe(audio_file)
+            if not transcript:
+                logger.info("No speech detected.")
+                self.state.set_state(AssistantState.IDLE)
+                return None
+
+            # Append to conv.txt
+            with open("conv.txt", "a", encoding="utf-8") as f:
+                f.write(f"{transcript}\n")
+
+            return transcript
+        except Exception as e:
+            logger.error(f"Unexpected error in record_and_transcribe: {e}")
             self.state.set_state(AssistantState.IDLE)
             return None
-
-        # Append to conv.txt
-        with open("conv.txt", "a", encoding="utf-8") as f:
-            f.write(f"{transcript}\n")
-
-        return transcript
 
     def think_and_speak(self, prompt: str) -> str:
         """Queries LLM and speaks generated reply."""
