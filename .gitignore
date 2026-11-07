@@ -1,0 +1,40 @@
+# Environment variables & API keys (CRITICAL: NEVER COMMIT)
+.env
+.env.local
+.env.*.local
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Python cache & build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+
+# Audio recordings & temporary state files
+audio/*.wav
+audio/*.mp3
+conv.txt
+status.txt
+
+# Editor & OS settings
+.vscode/
+.idea/
+.DS_Store
+*.swp
