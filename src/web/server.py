@@ -15,532 +15,365 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>J.A.R.V.I.S. // Stark Industries Tactical HUD</title>
+  <title>Syntrix // J.A.R.V.I.S. OS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #050811;
-      --panel-bg: rgba(10, 16, 30, 0.75);
-      --border-cyan: rgba(0, 240, 255, 0.25);
-      --cyan: #00f0ff;
-      --cyan-glow: 0 0 20px rgba(0, 240, 255, 0.6);
-      --red: #ef4444;
-      --red-glow: 0 0 20px rgba(239, 68, 68, 0.7);
-      --amber: #f59e0b;
-      --text: #e2e8f0;
-      --text-dim: #64748b;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Rajdhani', sans-serif;
-      height: 100vh;
-      overflow: hidden;
-      display: flex;
-      background-image: 
-        radial-gradient(circle at 50% 30%, rgba(0, 240, 255, 0.08) 0%, transparent 60%),
-        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
-      background-size: 100% 100%, 40px 40px, 40px 40px;
-    }
-
-    /* Left HUD Panel: Arc Reactor & Telemetry */
-    .hud-left {
-      width: 440px;
-      height: 100vh;
-      background: var(--panel-bg);
-      backdrop-filter: blur(16px);
-      border-right: 1px solid var(--border-cyan);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 30px 24px;
-      gap: 24px;
-      position: relative;
-      box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5);
-    }
-    .hud-header {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--border-cyan);
-      padding-bottom: 16px;
-    }
-    .stark-brand {
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 900;
-      font-size: 22px;
-      letter-spacing: 2px;
-      color: var(--cyan);
-      text-shadow: var(--cyan-glow);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .stark-sub {
-      font-size: 11px;
-      letter-spacing: 3px;
-      color: var(--text-dim);
-      font-weight: 600;
-    }
-    .protocol-tag {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      background: rgba(0, 240, 255, 0.1);
-      border: 1px solid var(--cyan);
-      color: var(--cyan);
-      padding: 4px 8px;
-      border-radius: 4px;
-      letter-spacing: 1px;
-    }
-
-    /* ARC REACTOR VISUALIZER */
-    .reactor-container {
-      position: relative;
-      width: 240px;
-      height: 240px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 10px 0;
-    }
-    .reactor-ring-outer {
-      position: absolute;
-      width: 230px;
-      height: 230px;
-      border: 2px dashed rgba(0, 240, 255, 0.4);
+    * { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    
+    /* 3D Iridescent Glass Sphere */
+    .glass-orb {
+      width: 86px;
+      height: 86px;
       border-radius: 50%;
-      animation: rotateRing 20s linear infinite;
-    }
-    .reactor-ring-mid {
-      position: absolute;
-      width: 180px;
-      height: 180px;
-      border: 3px solid rgba(0, 240, 255, 0.6);
-      border-top-color: transparent;
-      border-bottom-color: transparent;
-      border-radius: 50%;
-      animation: rotateRingRev 10s linear infinite;
-    }
-    .reactor-core {
-      position: absolute;
-      width: 110px;
-      height: 110px;
-      border-radius: 50%;
-      background: radial-gradient(circle, #ffffff 0%, var(--cyan) 50%, rgba(0, 240, 255, 0.2) 100%);
-      box-shadow: 0 0 40px var(--cyan), inset 0 0 20px #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      animation: coreBreath 3s ease-in-out infinite;
-      transition: all 0.4s ease;
-    }
-    .reactor-inner-icon {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 28px;
-      font-weight: 900;
-      color: #050811;
-      text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-    }
-
-    /* State Visual Variants */
-    .state-listening .reactor-core {
-      background: radial-gradient(circle, #ffffff 0%, #38bdf8 50%, rgba(56, 189, 248, 0.4) 100%);
-      box-shadow: 0 0 60px #38bdf8, inset 0 0 30px #ffffff;
-      animation: pulseFast 1s ease-in-out infinite;
-    }
-    .state-processing .reactor-core {
-      background: radial-gradient(circle, #ffffff 0%, var(--amber) 50%, rgba(245, 158, 11, 0.3) 100%);
-      box-shadow: 0 0 60px var(--amber), inset 0 0 30px #ffffff;
-      animation: rotateRing 1.5s linear infinite;
-    }
-    .state-speaking .reactor-core {
-      background: radial-gradient(circle, #ffffff 0%, var(--red) 50%, rgba(239, 68, 68, 0.4) 100%);
-      box-shadow: 0 0 70px var(--red), inset 0 0 30px #ffffff;
-      animation: pulseFast 0.8s ease-in-out infinite;
-    }
-
-    @keyframes rotateRing {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    @keyframes rotateRingRev {
-      from { transform: rotate(360deg); }
-      to { transform: rotate(0deg); }
-    }
-    @keyframes coreBreath {
-      0%, 100% { transform: scale(1); opacity: 0.9; }
-      50% { transform: scale(1.05); opacity: 1; }
-    }
-    @keyframes pulseFast {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.12); }
-    }
-
-    /* Audio Equalizer Bars */
-    .equalizer-bar-box {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      height: 36px;
-      margin-bottom: 5px;
-    }
-    .eq-bar {
-      width: 4px;
-      height: 8px;
-      background: var(--cyan);
-      border-radius: 2px;
-      transition: height 0.1s ease;
-      box-shadow: 0 0 8px var(--cyan);
-    }
-
-    /* Status Banner */
-    .status-hud-card {
-      width: 100%;
-      background: rgba(0, 240, 255, 0.05);
-      border: 1px solid var(--border-cyan);
-      border-radius: 8px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      text-align: center;
-    }
-    .status-title {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      color: var(--text-dim);
-      text-transform: uppercase;
-    }
-    .status-text {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      color: var(--cyan);
-      text-shadow: var(--cyan-glow);
-      transition: all 0.3s ease;
-    }
-    .state-listening .status-text { color: #38bdf8; text-shadow: 0 0 15px #38bdf8; }
-    .state-processing .status-text { color: var(--amber); text-shadow: 0 0 15px var(--amber); }
-    .state-speaking .status-text { color: var(--red); text-shadow: var(--red-glow); }
-
-    /* Telemetry Info */
-    .telemetry-grid {
-      width: 100%;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      margin-top: auto;
-    }
-    .telem-item {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 6px;
-      padding: 10px;
-    }
-    .telem-label { color: var(--text-dim); margin-bottom: 2px; font-size: 10px; }
-    .telem-val { color: var(--cyan); font-weight: 600; }
-
-    .btn-clear {
-      width: 100%;
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.4);
-      color: #fca5a5;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      padding: 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.2s;
-    }
-    .btn-clear:hover {
-      background: rgba(239, 68, 68, 0.25);
-      border-color: var(--red);
-      color: #ffffff;
-      box-shadow: var(--red-glow);
-    }
-
-    /* Right Main Panel: Holographic Conversation */
-    .hud-main {
-      flex: 1;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
+      background: radial-gradient(circle at 32% 28%, #ffffff 0%, #38ef7d 22%, #11998e 45%, #0284c7 72%, #0f172a 100%);
+      box-shadow: 
+        inset 0 0 16px rgba(255, 255, 255, 0.8),
+        inset 0 -10px 20px rgba(2, 132, 199, 0.7),
+        0 12px 35px rgba(17, 153, 142, 0.45),
+        0 0 55px rgba(56, 239, 125, 0.35);
       position: relative;
+      animation: orbFloat 4s ease-in-out infinite;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .main-topbar {
-      padding: 24px 40px;
-      border-bottom: 1px solid rgba(0, 240, 255, 0.15);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: rgba(5, 8, 17, 0.8);
-      backdrop-filter: blur(8px);
+    .glass-orb::before {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: 16px;
+      width: 28px;
+      height: 16px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0) 100%);
+      transform: rotate(-25deg);
     }
-    .topbar-title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 16px;
-      letter-spacing: 2px;
-      color: var(--text);
-    }
-    .topbar-title span { color: var(--cyan); }
-    .companion-tag {
-      font-size: 13px;
-      color: #f472b6;
-      font-weight: 600;
-      letter-spacing: 1px;
-    }
-
-    .conversation-log {
-      flex: 1;
-      overflow-y: auto;
-      padding: 30px 40px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      scroll-behavior: smooth;
-    }
-    .conversation-log::-webkit-scrollbar { width: 6px; }
-    .conversation-log::-webkit-scrollbar-thumb {
-      background: rgba(0, 240, 255, 0.2);
-      border-radius: 3px;
+    .glass-orb::after {
+      content: '';
+      position: absolute;
+      bottom: 9px;
+      right: 16px;
+      width: 22px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(56, 239, 125, 0.65);
+      filter: blur(2px);
     }
 
-    .bubble {
-      max-width: 72%;
-      padding: 16px 22px;
-      border-radius: 12px;
-      font-size: 16px;
-      line-height: 1.6;
-      position: relative;
-      animation: slideIn 0.25s ease-out;
-    }
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .bubble-author {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      margin-bottom: 6px;
-      text-transform: uppercase;
+    @keyframes orbFloat {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-7px) scale(1.02); }
     }
 
-    /* Ruth / User Message */
-    .bubble-user {
-      align-self: flex-end;
-      background: linear-gradient(135deg, rgba(30, 27, 75, 0.8), rgba(49, 46, 129, 0.8));
-      border: 1px solid rgba(129, 140, 248, 0.4);
-      color: #e0e7ff;
-      border-bottom-right-radius: 2px;
-      box-shadow: 0 4px 20px rgba(49, 46, 129, 0.25);
+    /* Listening state pulse */
+    .orb-listening {
+      box-shadow: 
+        0 0 0 0 rgba(56, 189, 248, 0.7),
+        0 0 50px rgba(56, 189, 248, 0.7),
+        0 12px 35px rgba(2, 132, 199, 0.8) !important;
+      animation: listeningPulse 1.3s ease-out infinite !important;
     }
-    .bubble-user .bubble-author { color: #a5b4fc; }
+    @keyframes listeningPulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.8); }
+      70% { transform: scale(1.1); box-shadow: 0 0 0 25px rgba(56, 189, 248, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+    }
 
-    /* JARVIS Message */
-    .bubble-jarvis {
-      align-self: flex-start;
-      background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(185, 28, 28, 0.25));
-      border: 1px solid rgba(239, 68, 68, 0.4);
-      color: #ffffff;
-      border-bottom-left-radius: 2px;
-      box-shadow: 0 4px 25px rgba(239, 68, 68, 0.15);
+    /* Speaking state pulse */
+    .orb-speaking {
+      background: radial-gradient(circle at 32% 28%, #ffffff 0%, #f43f5e 22%, #e11d48 45%, #881337 72%, #0f172a 100%) !important;
+      box-shadow: 
+        0 0 50px rgba(244, 63, 94, 0.6),
+        0 12px 35px rgba(225, 29, 72, 0.7) !important;
+      animation: listeningPulse 1.1s ease-out infinite !important;
     }
-    .bubble-jarvis .bubble-author { color: #f87171; }
 
-    .empty-state {
-      margin: auto;
-      text-align: center;
-      max-width: 440px;
+    /* Processing state */
+    .orb-processing {
+      background: radial-gradient(circle at 32% 28%, #ffffff 0%, #fbbf24 22%, #d97706 45%, #78350f 72%, #0f172a 100%) !important;
+      box-shadow: 0 0 45px rgba(245, 158, 11, 0.6) !important;
+      animation: orbFloat 1.2s ease-in-out infinite !important;
     }
-    .empty-title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 20px;
-      color: var(--cyan);
-      margin-bottom: 10px;
-      letter-spacing: 1px;
-    }
-    .empty-desc {
-      color: var(--text-dim);
-      font-size: 15px;
-      line-height: 1.6;
-    }
+
+    /* Custom thin scrollbar */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 4px; }
   </style>
 </head>
-<body id="hudBody">
-  <!-- Left Telemetry & Arc Reactor Column -->
-  <aside class="hud-left">
-    <div class="hud-header">
+<body class="bg-[#080b11] text-slate-100 min-h-screen flex items-center justify-center p-6 antialiased selection:bg-cyan-500/30">
+  
+  <!-- Outer Floating App Frame (Matching Syntrix reference image) -->
+  <div class="w-full max-w-6xl rounded-[36px] bg-[#0c1017] border border-white/[0.08] shadow-[0_30px_90px_-20px_rgba(0,0,0,0.9)] overflow-hidden flex h-[740px] relative">
+    
+    <!-- Ambient Cyan Glow (Top Right) -->
+    <div class="absolute top-0 right-0 w-[550px] h-[400px] bg-gradient-to-bl from-teal-500/15 via-cyan-600/10 to-transparent pointer-events-none rounded-tr-[36px] blur-3xl"></div>
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="w-64 bg-[#0f141d]/90 border-r border-white/[0.06] p-6 flex flex-col justify-between shrink-0 z-10 backdrop-blur-md">
       <div>
-        <div class="stark-brand">J.A.R.V.I.S.</div>
-        <div class="stark-sub">TACTICAL VOICE OS</div>
-      </div>
-      <div class="protocol-tag">SYS-v2.5</div>
-    </div>
+        <!-- Brand & Search -->
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-3">
+            <!-- Mini Orb Icon -->
+            <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-teal-400 to-cyan-300 shadow-[0_0_12px_rgba(45,212,191,0.5)] flex items-center justify-center">
+              <div class="w-2.5 h-2.5 rounded-full bg-white/95"></div>
+            </div>
+            <span class="font-bold text-base tracking-tight text-white">Syntrix <span class="text-xs text-cyan-400 font-medium">OS</span></span>
+          </div>
+          <button class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/[0.05] transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </button>
+        </div>
 
-    <!-- Arc Reactor -->
-    <div class="reactor-container">
-      <div class="reactor-ring-outer"></div>
-      <div class="reactor-ring-mid"></div>
-      <div class="reactor-core">
-        <div class="reactor-inner-icon">AI</div>
-      </div>
-    </div>
+        <!-- New Chat Button -->
+        <button onclick="resetConversation()" class="w-full bg-[#181f2c]/90 hover:bg-[#20293a] border border-white/[0.08] rounded-xl py-2.5 px-3.5 flex items-center gap-2.5 text-xs font-semibold text-slate-200 transition shadow-sm mb-7 group">
+          <svg class="w-4 h-4 text-cyan-400 group-hover:scale-110 transition" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+          New Conversation
+        </button>
 
-    <!-- Live Audio Equalizer -->
-    <div class="equalizer-bar-box" id="eqBox">
-      <div class="eq-bar" style="height: 10px;"></div>
-      <div class="eq-bar" style="height: 18px;"></div>
-      <div class="eq-bar" style="height: 28px;"></div>
-      <div class="eq-bar" style="height: 14px;"></div>
-      <div class="eq-bar" style="height: 24px;"></div>
-      <div class="eq-bar" style="height: 32px;"></div>
-      <div class="eq-bar" style="height: 19px;"></div>
-      <div class="eq-bar" style="height: 12px;"></div>
-      <div class="eq-bar" style="height: 26px;"></div>
-      <div class="eq-bar" style="height: 15px;"></div>
-    </div>
+        <!-- Features Nav -->
+        <div class="mb-6">
+          <div class="text-[10px] font-bold tracking-wider uppercase text-slate-400 px-2 mb-2.5">Features</div>
+          <div class="space-y-1 text-xs">
+            <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl text-slate-300 bg-white/[0.04] font-medium transition">
+              <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+              Voice Assistant
+            </a>
+            <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-white/[0.03] transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+              Intelligence
+            </a>
+            <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-white/[0.03] transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/></svg>
+              Codex & Tools
+            </a>
+          </div>
+        </div>
 
-    <!-- Status Display -->
-    <div class="status-hud-card">
-      <div class="status-title">Core Subsystem Status</div>
-      <div class="status-text" id="statusLabel">ONLINE</div>
-    </div>
+        <!-- Recent Sessions -->
+        <div>
+          <div class="text-[10px] font-bold tracking-wider uppercase text-slate-400 px-2 mb-2">Live Session Log</div>
+          <div class="space-y-1 text-xs text-slate-400" id="sidebarChatList">
+            <div class="px-3 py-1.5 rounded-lg text-slate-300 truncate">Companion Chat</div>
+            <div class="px-3 py-1.5 rounded-lg truncate">Technical Diagnostics</div>
+          </div>
+        </div>
+      </div>
 
-    <!-- Telemetry -->
-    <div class="telemetry-grid">
-      <div class="telem-item">
-        <div class="telem-label">AI BRAIN</div>
-        <div class="telem-val">Gemini 3.5 Lite</div>
+      <!-- Bottom Status Card -->
+      <div class="bg-gradient-to-b from-[#161c28] to-[#111622] border border-white/[0.08] rounded-2xl p-3.5 shadow-sm">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-cyan-400">Tactical Status</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></span>
+        </div>
+        <div class="text-xs font-semibold text-white">Gemini 3.5 Flash Lite</div>
+        <div class="text-[11px] text-slate-400">Deepgram STT // PipeWire</div>
       </div>
-      <div class="telem-item">
-        <div class="telem-label">VOICE RECOG</div>
-        <div class="telem-val">Deepgram Nova-2</div>
-      </div>
-      <div class="telem-item">
-        <div class="telem-label">SYNTHESIS</div>
-        <div class="telem-val">Edge Neural</div>
-      </div>
-      <div class="telem-item">
-        <div class="telem-label">AUDIO HOST</div>
-        <div class="telem-val">PipeWire 16kHz</div>
-      </div>
-    </div>
+    </aside>
 
-    <button class="btn-clear" onclick="resetConversation()">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-      CLEAR COMMS LOG
-    </button>
-  </aside>
+    <!-- RIGHT MAIN CONTENT -->
+    <main class="flex-1 flex flex-col justify-between p-8 relative z-10 overflow-hidden">
+      <!-- Top Navigation -->
+      <header class="flex items-center justify-between shrink-0">
+        <!-- Model Pill -->
+        <button class="bg-[#161c28]/90 hover:bg-[#1e2638] border border-white/[0.08] rounded-full py-1.5 px-4 flex items-center gap-2.5 text-xs font-medium text-slate-200 transition shadow-sm">
+          <span class="w-1.5 h-1.5 rounded-full bg-teal-400 shadow-[0_0_6px_#2dd4bf]"></span>
+          <span>Syntrix v4.2 (Gemini)</span>
+          <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
 
-  <!-- Right Holographic Conversation Log -->
-  <main class="hud-main">
-    <div class="main-topbar">
-      <div class="topbar-title">TACTICAL COMMS // <span>LIVE CHANNEL</span></div>
-      <div class="companion-tag">PRIMARY USER: RUTH</div>
-    </div>
+        <!-- Right User Pill & Links -->
+        <div class="flex items-center gap-6 text-xs font-medium text-slate-400">
+          <a href="#" class="text-white hover:text-cyan-300 transition">Dashboard</a>
+          <a href="#" class="hover:text-white transition">Settings</a>
+          <a href="#" class="hover:text-white transition">Help & Support</a>
+          
+          <!-- Ruth Avatar -->
+          <div class="flex items-center gap-2.5 pl-3 border-l border-white/[0.1]">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-white shadow-[0_0_12px_rgba(168,85,247,0.4)] ring-2 ring-white/10">
+              R
+            </div>
+            <span class="text-white font-semibold text-xs">Ruth</span>
+          </div>
+        </div>
+      </header>
 
-    <div class="conversation-log" id="chatContainer">
-      <div class="empty-state">
-        <div class="empty-title">Awaiting Voice Transmission</div>
-        <div class="empty-desc">Speak naturally into your microphone. J.A.R.V.I.S. is listening and will transcribe and respond in real-time.</div>
-      </div>
-    </div>
-  </main>
+      <!-- Center Hero / Conversation Stream -->
+      <section class="flex-1 flex flex-col justify-center items-center my-auto overflow-hidden py-4 w-full" id="centerSection">
+        
+        <!-- Hero Orb View (Visible when idle / empty) -->
+        <div id="heroOrbView" class="flex flex-col items-center justify-center text-center">
+          <!-- The Floating 3D Orb -->
+          <div class="mb-4">
+            <div id="centralOrb" class="glass-orb"></div>
+          </div>
+          <div class="text-[11px] font-bold tracking-[0.25em] text-slate-400 uppercase mb-1.5">Welcome Back, Ruth</div>
+          <h1 class="text-3xl font-bold tracking-tight text-white mb-2" id="heroTitle">Bring your ideas to life today</h1>
+          <p class="text-xs text-slate-400 max-w-md mb-6" id="statusSubtext">Speak into your microphone or type below. JARVIS is standing by.</p>
+        </div>
+
+        <!-- Chat Bubble View (Appears as conversation grows) -->
+        <div id="chatStreamView" class="w-full max-w-2xl h-80 overflow-y-auto hidden flex-col gap-3 px-2 mb-4 scroll-smooth">
+        </div>
+
+        <!-- Input Bar (Dual Voice & Typing) -->
+        <div class="w-full max-w-2xl bg-[#141a24]/90 backdrop-blur-md border border-white/[0.08] rounded-2xl p-3.5 shadow-2xl shrink-0">
+          <div class="flex items-center gap-2.5 px-2 pt-1 pb-3">
+            <span class="text-cyan-400 text-sm">✦</span>
+            <input id="promptInput" type="text" placeholder="Ask me anything... (or speak into your microphone)" class="w-full bg-transparent border-none outline-none text-xs text-white placeholder-slate-400">
+          </div>
+          <div class="flex items-center justify-between pt-2.5 border-t border-white/[0.06] px-1">
+            <div class="flex items-center gap-2">
+              <button class="w-6 h-6 rounded-full bg-white/[0.06] hover:bg-white/[0.1] text-slate-300 flex items-center justify-center text-xs transition">+</button>
+              <button class="px-3 py-1 rounded-full bg-white/[0.06] hover:bg-white/[0.1] text-[11px] text-slate-300 flex items-center gap-1 transition">
+                <span>Tools</span>
+                <svg class="w-2.5 h-2.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <button class="px-3 py-1 rounded-full bg-white/[0.06] hover:bg-white/[0.1] text-[11px] text-slate-300 flex items-center gap-1 transition">
+                <span>Deep Think</span>
+                <svg class="w-2.5 h-2.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <div id="voicePill" class="px-3 py-1 rounded-full bg-white/[0.06] border border-white/[0.08] text-[11px] text-slate-300 flex items-center gap-2 transition">
+                <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+                <span id="voiceStatusText">Voice (Ready)</span>
+              </div>
+              <button onclick="handleSendText()" class="w-7 h-7 rounded-full bg-white hover:bg-slate-200 text-slate-900 flex items-center justify-center text-xs transition shadow-md font-bold">
+                ➤
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bottom 3 Feature Cards (Matching reference) -->
+      <footer class="grid grid-cols-3 gap-4 shrink-0">
+        <!-- Card 1 -->
+        <div class="bg-[#131924]/80 hover:bg-[#18202e] border border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between transition cursor-pointer group shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <div class="w-8 h-8 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+            </div>
+            <span class="text-slate-400 group-hover:text-white transition text-xs">↗</span>
+          </div>
+          <div>
+            <div class="text-xs font-semibold text-white">Voice Recognition</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">Deepgram Nova-2 + 32k MP3</div>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="bg-[#131924]/80 hover:bg-[#18202e] border border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between transition cursor-pointer group shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <div class="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            </div>
+            <span class="text-slate-400 group-hover:text-white transition text-xs">↗</span>
+          </div>
+          <div>
+            <div class="text-xs font-semibold text-white">Gemini 3.5 Intelligence</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">Warm, witty & loyal conversation</div>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="bg-[#131924]/80 hover:bg-[#18202e] border border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between transition cursor-pointer group shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <div class="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            </div>
+            <span class="text-slate-400 group-hover:text-white transition text-xs">↗</span>
+          </div>
+          <div>
+            <div class="text-xs font-semibold text-white">Neural Speech Engine</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">PipeWire Bluetooth output</div>
+          </div>
+        </div>
+      </footer>
+    </main>
+  </div>
 
   <script>
     let cachedJson = "";
-    const bars = document.querySelectorAll('.eq-bar');
-
-    function animateEqualizer(isActive) {
-      bars.forEach(bar => {
-        if (isActive) {
-          const h = Math.floor(Math.random() * 30) + 6;
-          bar.style.height = h + 'px';
-        } else {
-          bar.style.height = '6px';
-        }
-      });
-    }
+    const orb = document.getElementById('centralOrb');
+    const voicePill = document.getElementById('voicePill');
+    const voiceStatusText = document.getElementById('voiceStatusText');
 
     async function syncState() {
       try {
         const res = await fetch('/api/state');
         const data = await res.json();
         
-        const rawStatus = data.status || 'Idle';
-        document.getElementById('statusLabel').innerText = rawStatus.toUpperCase();
-
-        const body = document.getElementById('hudBody');
-        body.className = '';
-        const st = rawStatus.toLowerCase();
+        const rawStatus = (data.status || 'Idle').toLowerCase();
         
-        let isActive = false;
-        if (st.includes('listen')) {
-          body.classList.add('state-listening');
-          isActive = true;
-        } else if (st.includes('process')) {
-          body.classList.add('state-processing');
-          isActive = true;
-        } else if (st.includes('speak')) {
-          body.classList.add('state-speaking');
-          isActive = true;
+        // Update Orb & Voice Pill reaction
+        orb.className = 'glass-orb';
+        voicePill.className = 'px-3 py-1 rounded-full bg-white/[0.06] border border-white/[0.08] text-[11px] text-slate-300 flex items-center gap-2 transition';
+        
+        if (rawStatus.includes('listen')) {
+          orb.classList.add('orb-listening');
+          voicePill.className = 'px-3 py-1 rounded-full bg-cyan-500/20 border border-cyan-400 text-[11px] text-cyan-200 flex items-center gap-2 transition shadow-[0_0_12px_rgba(6,182,212,0.4)]';
+          voiceStatusText.innerText = 'Listening to Ruth...';
+        } else if (rawStatus.includes('process')) {
+          orb.classList.add('orb-processing');
+          voicePill.className = 'px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400 text-[11px] text-amber-200 flex items-center gap-2 transition';
+          voiceStatusText.innerText = 'Thinking...';
+        } else if (rawStatus.includes('speak')) {
+          orb.classList.add('orb-speaking');
+          voicePill.className = 'px-3 py-1 rounded-full bg-rose-500/20 border border-rose-400 text-[11px] text-rose-200 flex items-center gap-2 transition shadow-[0_0_15px_rgba(244,63,94,0.4)]';
+          voiceStatusText.innerText = 'JARVIS Speaking...';
+        } else {
+          voiceStatusText.innerText = 'Voice (Ready)';
         }
 
-        animateEqualizer(isActive);
-
-        // Update conversation
+        // Update conversation view
         const jsonStr = JSON.stringify(data.conversation);
         if (jsonStr !== cachedJson) {
           cachedJson = jsonStr;
-          const container = document.getElementById('chatContainer');
+          const streamView = document.getElementById('chatStreamView');
+          const heroOrbView = document.getElementById('heroOrbView');
+
           if (!data.conversation || data.conversation.length === 0) {
-            container.innerHTML = `
-              <div class="empty-state">
-                <div class="empty-title">Awaiting Voice Transmission</div>
-                <div class="empty-desc">Speak naturally into your microphone. J.A.R.V.I.S. is listening and will transcribe and respond in real-time.</div>
-              </div>`;
+            streamView.classList.add('hidden');
+            streamView.classList.remove('flex');
+            heroOrbView.classList.remove('hidden');
             return;
           }
-          container.innerHTML = '';
+
+          // Switch to stream view
+          heroOrbView.classList.add('hidden');
+          streamView.classList.remove('hidden');
+          streamView.classList.add('flex');
+          streamView.innerHTML = '';
+
           data.conversation.forEach((msg, idx) => {
             if (!msg.trim()) return;
             const bubble = document.createElement('div');
             const isUser = (idx % 2 === 0);
-            bubble.className = 'bubble ' + (isUser ? 'bubble-user' : 'bubble-jarvis');
             
-            const author = document.createElement('div');
-            author.className = 'bubble-author';
-            author.innerText = isUser ? 'RUTH' : 'J.A.R.V.I.S.';
-            
-            const text = document.createElement('div');
-            text.innerText = msg;
-            
-            bubble.appendChild(author);
-            bubble.appendChild(text);
-            container.appendChild(bubble);
+            if (isUser) {
+              bubble.className = 'bg-indigo-950/70 border border-indigo-500/40 rounded-2xl p-3 text-xs leading-relaxed self-end max-w-lg text-slate-100 shadow-sm';
+              bubble.innerHTML = `<div class="font-bold text-indigo-300 text-[10px] uppercase tracking-wider mb-1">Ruth</div><div>${escapeHtml(msg)}</div>`;
+            } else {
+              bubble.className = 'bg-[#181e2b]/95 border border-white/[0.08] rounded-2xl p-3 text-xs leading-relaxed self-start max-w-lg text-slate-100 shadow-sm';
+              bubble.innerHTML = `<div class="font-bold text-teal-400 text-[10px] uppercase tracking-wider mb-1">Syntrix (JARVIS)</div><div>${escapeHtml(msg)}</div>`;
+            }
+            streamView.appendChild(bubble);
           });
-          container.scrollTop = container.scrollHeight;
+          streamView.scrollTop = streamView.scrollHeight;
         }
       } catch (e) {
-        console.error("HUD Sync Error:", e);
+        console.error(e);
       }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.innerText = text;
+      return div.innerHTML;
     }
 
     async function resetConversation() {
@@ -548,6 +381,17 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       cachedJson = "";
       syncState();
     }
+
+    function handleSendText() {
+      const input = document.getElementById('promptInput');
+      const val = input.value.trim();
+      if (!val) return;
+      input.value = '';
+    }
+
+    document.getElementById('promptInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleSendText();
+    });
 
     setInterval(syncState, 350);
     syncState();
