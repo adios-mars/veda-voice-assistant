@@ -1,4 +1,4 @@
-"""Embedded web dashboard server for JARVIS."""
+"""Embedded web dashboard server for Veda."""
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 import json
 import os
@@ -15,14 +15,20 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Veda // Here to listen, ready to help</title>
+  <title>Veda - Here to listen, ready to help</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { font-family: 'Plus Jakarta Sans', sans-serif; }
-    
+
+    body {
+      background-color: #0c0c0e;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+
     .mic-active {
       color: #38bdf8 !important;
       animation: micPulse 1.2s ease-in-out infinite;
@@ -33,72 +39,88 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }
 
     ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 4px; }
   </style>
 </head>
-<body class="bg-[#0e0e11] text-slate-100 min-h-screen flex items-center justify-center p-4 antialiased selection:bg-blue-500/30">
+<body class="text-zinc-100 min-h-screen flex items-center justify-center p-4 antialiased selection:bg-blue-500/30">
   
-  <!-- Outer Minimalist Card (Matching user reference) -->
-  <div class="w-full max-w-2xl flex flex-col justify-between py-6 px-3 min-h-[560px]">
+  <div class="w-full max-w-2xl flex flex-col justify-between py-8 px-2 min-h-[560px]">
 
-    <!-- Top Brand Header -->
-    <div class="flex flex-col items-center justify-center text-center mb-6">
+    <!-- Brand Header -->
+    <div class="flex flex-col items-center justify-center text-center mb-7">
       <div class="flex items-center gap-2.5 mb-1.5">
-        <svg class="w-5 h-5 text-slate-200" fill="currentColor" viewBox="0 0 24 24">
+        <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
           <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
         </svg>
         <h1 class="text-2xl font-bold text-white tracking-tight">Veda</h1>
       </div>
-      <p class="text-xs text-slate-400">Here to listen, ready to help</p>
+      <p class="text-xs text-zinc-400 font-normal">Here to listen, ready to help</p>
     </div>
 
-    <!-- Conversation Stream (Displays live messages) -->
-    <div id="chatStream" class="flex-1 flex flex-col gap-3.5 overflow-y-auto max-h-64 mb-4 px-1 hidden scroll-smooth">
+    <!-- Live Conversation Stream -->
+    <div id="chatStream" class="flex-1 flex flex-col gap-3 overflow-y-auto max-h-64 mb-4 px-1 hidden scroll-smooth">
     </div>
 
-    <!-- Main Central Input Card (Exact styling from reference) -->
-    <div class="bg-[#18181b] border border-white/[0.08] rounded-[26px] p-4 shadow-2xl transition focus-within:border-white/20 mb-5">
-      <!-- Input Text Area -->
+    <!-- Central Input Box (Matches user reference) -->
+    <div class="bg-[#17171a] border border-white/[0.08] rounded-[24px] p-4 shadow-2xl transition focus-within:border-white/20 mb-5">
+      <!-- Input Area -->
       <div class="mb-3 px-1">
         <textarea 
           id="promptInput" 
           rows="2" 
           placeholder="Ask anything..." 
-          class="w-full bg-transparent border-none outline-none resize-none text-sm text-slate-100 placeholder-slate-400 leading-relaxed"
+          class="w-full bg-transparent border-none outline-none resize-none text-sm text-zinc-100 placeholder-zinc-500 leading-relaxed"
           onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); handleSendText(); }"
         ></textarea>
       </div>
 
       <!-- Bottom Card Toolbar -->
-      <div class="flex items-center justify-between pt-2.5 border-t border-white/[0.06] text-xs">
-        <!-- Left tools -->
+      <div class="flex items-center justify-between pt-2 border-t border-white/[0.05] text-xs">
+        <!-- Left Toolbar Items -->
         <div class="flex items-center gap-2">
-          <button onclick="resetConversation()" title="New Chat / Clear" class="w-7 h-7 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-slate-300 flex items-center justify-center transition">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          <!-- New Chat / Clear Button -->
+          <button onclick="resetConversation()" title="New Chat / Clear Conversation" class="w-7 h-7 rounded-lg bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-400 hover:text-white flex items-center justify-center transition">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
           </button>
-          <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.04] text-slate-300 font-medium">
-            <svg class="w-3.5 h-3.5 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-            <span>Companion</span>
+
+          <!-- Grid / Capabilities Button -->
+          <button onclick="promptInput.focus()" title="Capabilities" class="w-7 h-7 rounded-lg bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-400 hover:text-white flex items-center justify-center transition">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+              <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+              <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+              <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+            </svg>
+          </button>
+
+          <!-- System Indicator Pill -->
+          <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-800/50 text-zinc-300 font-medium">
+            <svg class="w-3.5 h-3.5 text-zinc-400" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            <span class="text-xs">Veda</span>
             <span id="companionBadge" class="text-[10px] text-blue-400 font-semibold px-1 py-0.2 rounded bg-blue-500/10 ml-0.5">Live</span>
           </div>
         </div>
 
-        <!-- Right model selector, Mic & Send button -->
+        <!-- Right Toolbar Items: Model Selector, Mic, Blue Send Button -->
         <div class="flex items-center gap-2.5">
-          <div class="flex items-center gap-1 text-slate-300 hover:text-white px-2.5 py-1 rounded-lg bg-white/[0.04] cursor-pointer">
-            <span class="text-amber-400 text-xs">✱</span>
+          <!-- Model selector pill with orange starburst -->
+          <div class="flex items-center gap-1.5 text-zinc-300 hover:text-white px-2.5 py-1 rounded-lg bg-zinc-800/50 cursor-pointer transition select-none">
+            <svg class="w-3 h-3 text-orange-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M4.93 19.07l14.14-14.14"/>
+            </svg>
             <span class="text-xs font-medium">Gemini 3.5</span>
-            <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+            <svg class="w-3 h-3 text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
           </div>
           
-          <!-- Mic status indicator -->
-          <div id="micIcon" class="text-slate-400 p-1 transition" title="Microphone Listening">
+          <!-- Microphone indicator -->
+          <div id="micIcon" class="text-zinc-400 p-1 transition cursor-pointer" title="Microphone Active">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
           </div>
 
-          <!-- Circular Blue Send Button (Exact match: blue with white up arrow) -->
-          <button onclick="handleSendText()" class="w-7 h-7 rounded-full bg-[#0084ff] hover:bg-blue-600 text-white flex items-center justify-center transition shadow-md shadow-blue-500/30 font-bold">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          <!-- Circular Blue Send Button with white up arrow -->
+          <button onclick="handleSendText()" title="Send Message" class="w-7 h-7 rounded-full bg-[#0084ff] hover:bg-blue-600 active:scale-95 text-white flex items-center justify-center transition shadow-md shadow-blue-500/25">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
           </button>
         </div>
       </div>
@@ -107,35 +129,47 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <!-- Bottom 3 Action Cards (Exact match from reference) -->
     <div class="grid grid-cols-3 gap-3">
       <!-- Card 1: Create -->
-      <div onclick="quickSend('I need someone to talk to.')" class="bg-[#18181b] hover:bg-[#202024] border border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between transition cursor-pointer group shadow-sm min-h-[92px]">
-        <div class="text-slate-400 group-hover:text-white mb-2 transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      <div onclick="quickSend('Help me create ')" class="bg-[#17171a] hover:bg-[#202024] border border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between transition cursor-pointer group shadow-sm min-h-[96px]">
+        <div class="text-zinc-400 group-hover:text-white mb-3 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
         </div>
         <div>
-          <div class="text-xs font-semibold text-white">Talk & Vent</div>
-          <div class="text-[11px] text-slate-400 mt-0.5">Share what is on your mind</div>
+          <div class="text-xs font-semibold text-white tracking-tight">Create</div>
+          <div class="text-[11px] text-zinc-400 mt-0.5">Tasks, Images, Docs</div>
         </div>
       </div>
 
       <!-- Card 2: Find -->
-      <div onclick="quickSend('Help me brainstorm a solution to a problem.')" class="bg-[#18181b] hover:bg-[#202024] border border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between transition cursor-pointer group shadow-sm min-h-[92px]">
-        <div class="text-slate-400 group-hover:text-white mb-2 transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg>
+      <div onclick="quickSend('Help me find answers about ')" class="bg-[#17171a] hover:bg-[#202024] border border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between transition cursor-pointer group shadow-sm min-h-[96px]">
+        <div class="text-zinc-400 group-hover:text-white mb-3 transition">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 8V6a2 2 0 0 1 2-2h2"/>
+            <path d="M16 4h2a2 2 0 0 1 2 2v2"/>
+            <path d="M20 16v2a2 2 0 0 1-2 2h-2"/>
+            <path d="M8 20H6a2 2 0 0 1-2-2v-2"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
         </div>
         <div>
-          <div class="text-xs font-semibold text-white">Find Solutions</div>
-          <div class="text-[11px] text-slate-400 mt-0.5">Answers, ideas & advice</div>
+          <div class="text-xs font-semibold text-white tracking-tight">Find</div>
+          <div class="text-[11px] text-zinc-400 mt-0.5">Answers & Files</div>
         </div>
       </div>
 
       <!-- Card 3: Research -->
-      <div onclick="quickSend('Give me a quick system check.')" class="bg-[#18181b] hover:bg-[#202024] border border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between transition cursor-pointer group shadow-sm min-h-[92px]">
-        <div class="text-slate-400 group-hover:text-white mb-2 transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+      <div onclick="quickSend('Let\\'s research ')" class="bg-[#17171a] hover:bg-[#202024] border border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between transition cursor-pointer group shadow-sm min-h-[96px]">
+        <div class="text-zinc-400 group-hover:text-white mb-3 transition">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="M3 11h16"/>
+            <path d="M11 3a13 13 0 0 0 0 16"/>
+            <path d="M11 3a13 13 0 0 1 0 16"/>
+            <path d="m15 15 5 5m-2-5 2 5-5-2"/>
+          </svg>
         </div>
         <div>
-          <div class="text-xs font-semibold text-white">Ask Anything</div>
-          <div class="text-[11px] text-slate-400 mt-0.5">Code, questions & facts</div>
+          <div class="text-xs font-semibold text-white tracking-tight">Research</div>
+          <div class="text-[11px] text-zinc-400 mt-0.5">Apps & Web</div>
         </div>
       </div>
     </div>
@@ -154,7 +188,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         
         const rawStatus = (data.status || 'Idle').toLowerCase();
         
-        // Update mic & status
+        // Update mic & status indicator
         if (rawStatus.includes('listen')) {
           micIcon.classList.add('mic-active');
           companionBadge.innerText = 'Listening';
@@ -173,7 +207,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           companionBadge.className = 'text-[10px] text-blue-400 font-semibold px-1 py-0.2 rounded bg-blue-500/10 ml-0.5';
         }
 
-        // Render conversation
+        // Render live conversation stream
         const jsonStr = JSON.stringify(data.conversation);
         if (jsonStr !== cachedJson) {
           cachedJson = jsonStr;
@@ -193,10 +227,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             const isUser = (idx % 2 === 0);
             
             if (isUser) {
-              bubble.className = 'bg-[#27272a] border border-white/[0.06] rounded-2xl p-3 px-4 text-xs leading-relaxed self-end max-w-lg text-slate-100 shadow-sm';
-              bubble.innerHTML = `<div class="font-bold text-slate-400 text-[10px] uppercase mb-0.5 tracking-wider">You</div><div>${escapeHtml(msg)}</div>`;
+              bubble.className = 'bg-[#242428] border border-white/[0.06] rounded-2xl p-3 px-4 text-xs leading-relaxed self-end max-w-lg text-zinc-100 shadow-sm';
+              bubble.innerHTML = `<div class="font-bold text-zinc-400 text-[10px] uppercase mb-0.5 tracking-wider">You</div><div>${escapeHtml(msg)}</div>`;
             } else {
-              bubble.className = 'bg-[#18181b] border border-white/[0.08] rounded-2xl p-3 px-4 text-xs leading-relaxed self-start max-w-lg text-slate-100 shadow-sm';
+              bubble.className = 'bg-[#18181b] border border-white/[0.08] rounded-2xl p-3 px-4 text-xs leading-relaxed self-start max-w-lg text-zinc-100 shadow-sm';
               bubble.innerHTML = `<div class="font-bold text-cyan-400 text-[10px] uppercase mb-0.5 tracking-wider">Veda</div><div>${escapeHtml(msg)}</div>`;
             }
             streamView.appendChild(bubble);
@@ -237,9 +271,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       }
     }
 
-    function quickSend(text) {
-      promptInput.value = text;
-      handleSendText();
+    function quickSend(prefix) {
+      promptInput.value = prefix;
+      promptInput.focus();
     }
 
     setInterval(syncState, 350);
@@ -251,7 +285,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
 
 class DashboardRequestHandler(SimpleHTTPRequestHandler):
-    """HTTP Request handler for the JARVIS dashboard."""
+    """HTTP Request handler for the Veda dashboard."""
 
     def do_GET(self):
         if self.path in ("/", "/index.html"):

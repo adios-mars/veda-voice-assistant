@@ -118,7 +118,7 @@ class GeminiLLM(BaseLLM):
                     logger.error(f"Gemini error with {model_name}: {e}")
                     continue
 
-        return "I apologize, sir. I experienced a momentary communication disruption."
+        return "I apologize. I experienced a momentary communication disruption. I am right here whenever you are ready."
 
 
 class EchoFallbackLLM(BaseLLM):
@@ -128,12 +128,12 @@ class EchoFallbackLLM(BaseLLM):
         logger.warning("No LLM API key configured — add GEMINI_API_KEY to .env for real AI responses.")
         p = prompt.lower()
         if "hello" in p or "hi" in p:
-            return "Good day! All systems online and operational. How can I assist you, sir?"
+            return "Good day. I am online and ready to help. How can I assist you today?"
         elif "who are you" in p:
-            return "I am JARVIS, your personal voice-activated artificial intelligence."
+            return "I am Veda, your personal AI companion. Here to listen, ready to help."
         elif "time" in p:
             return f"The current system time is {time.strftime('%I:%M %p')}."
-        return f"Understood, sir. You said: '{prompt}'. Standing by for your command."
+        return f"Understood. You said: '{prompt}'. I am here with you."
 
 
 def _is_placeholder(key: str) -> bool:

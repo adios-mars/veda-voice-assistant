@@ -1,4 +1,4 @@
-"""Core JARVIS Voice Assistant orchestrator."""
+"""Core Veda Voice Assistant orchestrator."""
 from pathlib import Path
 import time
 from typing import Dict, List, Optional
@@ -19,7 +19,7 @@ class JarvisAssistant:
     """Production-grade voice assistant coordinator."""
 
     def __init__(self):
-        logger.info("Initializing JARVIS Assistant subsystem...")
+        logger.info("Initializing Veda Assistant subsystem...")
         self.state = StateManager()
         self.recorder = AudioRecorder(config.audio)
         self.stt = SpeechToTextService()
@@ -33,7 +33,7 @@ class JarvisAssistant:
             Path("conv.txt").write_text("", encoding="utf-8")
 
         self.state.set_state(AssistantState.IDLE)
-        logger.info("JARVIS Assistant initialized and ready.")
+        logger.info("Veda Assistant initialized and ready.")
 
     def record_and_transcribe(self) -> Optional[str]:
         """Listens and transcribes user utterance."""

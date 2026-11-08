@@ -20,7 +20,7 @@ logger = get_logger("Main")
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="JARVIS: Personal Voice Assistant")
+    parser = argparse.ArgumentParser(description="Veda: Conversational AI Voice Assistant and Companion")
     parser.add_argument(
         "--web-only",
         action="store_true",
