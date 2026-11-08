@@ -1,6 +1,14 @@
 """Main execution entry point for JARVIS Voice Assistant."""
-import argparse
+import os
 import sys
+from pathlib import Path
+
+# Auto-detect and re-exec with local venv python if running under system python
+_venv_python = Path(__file__).resolve().parent / "venv" / "bin" / "python"
+if sys.prefix == sys.base_prefix and _venv_python.exists():
+    os.execv(str(_venv_python), [str(_venv_python)] + sys.argv)
+
+import argparse
 import threading
 
 from src.config import config
