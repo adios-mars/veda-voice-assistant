@@ -1,14 +1,15 @@
-# JARVIS: Personal AI Voice Assistant
+# J.A.R.V.I.S.: Tactical AI Voice Assistant & Holographic HUD
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.14-blue?style=for-the-badge&logo=python" alt="Python Version"/>
+  <img src="https://img.shields.io/badge/LLM-Google%20Gemini%203.5%20Lite%20%26%20OpenAI-4285F4?style=for-the-badge&logo=google" alt="LLM"/>
   <img src="https://img.shields.io/badge/Audio-PipeWire%20%7C%20PulseAudio-purple?style=for-the-badge&logo=linux" alt="Linux Audio"/>
-  <img src="https://img.shields.io/badge/STT-Deepgram%20Nova--2-13ef95?style=for-the-badge" alt="Deepgram"/>
-  <img src="https://img.shields.io/badge/TTS-ElevenLabs%20%7C%20Edge--TTS-ff462b?style=for-the-badge" alt="TTS"/>
+  <img src="https://img.shields.io/badge/STT-Deepgram%20Nova--2%20%2B%20Gemini-13ef95?style=for-the-badge" alt="Deepgram"/>
+  <img src="https://img.shields.io/badge/TTS-Edge--TTS%20Neural%20%7C%20ElevenLabs-ff462b?style=for-the-badge" alt="TTS"/>
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License"/>
 </p>
 
-An intelligent, low-latency conversational AI voice assistant written in Python. Integrates hardware-accelerated voice activity detection (VAD), cloud-based speech-to-text (Deepgram Nova-2), generative reasoning (OpenAI/Gemini), and neural speech synthesis (ElevenLabs / Edge-TTS) paired with a real-time reactive web dashboard.
+An intelligent, low-latency conversational AI voice assistant inspired by Tony Stark's J.A.R.V.I.S., running locally on Arch Linux with a zero-dependency futuristic holographic web HUD.
 
 ---
 
@@ -17,26 +18,29 @@ An intelligent, low-latency conversational AI voice assistant written in Python.
 ```mermaid
 flowchart LR
     A[🎙️ User Voice Input] -->|pyaudio + WebRTC VAD| B(Auto Silence Detection)
-    B -->|PCM 16kHz WAV| C[⚡ Deepgram Nova-2 STT]
-    C -->|Transcript String| D[🧠 OpenAI / Gemini LLM]
-    D -->|Contextual Reply| E[🔊 ElevenLabs / Edge-TTS]
-    E -->|Neural Audio Output| F[🎧 PipeWire / pw-play]
+    B -->|ffmpeg MP3 Compression| C[⚡ Deepgram Nova-2 STT]
+    C -.->|Failover| C2[🤖 Gemini Audio STT]
+    C -->|Transcript String| D[🧠 Google Gemini 3.5 Lite]
+    D -.->|Quota Failover| D2[🧠 Gemini 3.1 / Gemma]
+    D -->|Conversational Reply| E[🔊 Microsoft Edge-TTS Neural]
+    E -->|PCM WAV Output| F[🎧 PipeWire / pw-play]
     
-    C -.->|Real-time State| G[🖥️ Embedded Web Dashboard]
-    D -.->|Sync History| G
-    E -.->|System State| G
+    B -.->|Live Audio Waveform| G[🖥️ Tactical Holographic HUD]
+    D -.->|Real-time Transcript| G
+    E -.->|Arc Reactor State| G
 ```
 
 ---
 
 ## ✨ Features
 
-- **⚡ Sub-Second Latency Pipeline:** Uses Deepgram's Nova-2 transcription model for near-instant speech recognition.
-- **🎙️ Automatic Voice Activity Detection:** Automatically starts recording when you speak and stops when you pause—no buttons required.
-- **🔊 Multi-Engine Neural TTS:** Seamlessly supports **ElevenLabs** for cloned voices with an automatic, zero-cost fallback to **Edge-TTS** (no API key required).
-- **🖥️ Zero-Dependency Web Dashboard:** Beautiful modern dark-mode dashboard providing real-time chat history and state monitoring.
-- **🐧 Arch Linux & PipeWire Optimized:** Native Linux audio backend detection with automatic fallback across `pw-play`, `paplay`, and `ffplay`.
-- **🛡️ Secure Secret Management:** Strict `.gitignore` configuration ensuring your credentials and private audio recordings never leak to GitHub.
+- **⚡ Blazing Fast Conversational Loop:** Generates intelligent, charismatic voice responses in ~1-2 seconds end-to-end.
+- **🎙️ Automatic Voice Activity Detection (VAD):** Listens continuously and triggers automatically when you speak and pause—no push-to-talk buttons.
+- **📦 Pre-Upload Audio Compression:** Automatically compresses raw audio to 32kbps MP3 via ffmpeg before sending to cloud STT, reducing payload size by 85% and preventing slow upload timeouts.
+- **🛡️ Multi-Model Quota Failover:** Automatically switches between free models (`gemini-3.5-flash-lite` → `gemini-3.1-flash-lite` → `gemma-4-26b-a4b-it`) if daily limits or demand spikes occur.
+- **🔊 Zero-Cost High-Fidelity TTS:** Uses Microsoft Edge Neural voices (`en-US-ChristopherNeural`) with automatic WAV PCM conversion for native PipeWire audio servers.
+- **🖥️ Stark Industries Arc Reactor HUD:** Embedded sci-fi tactical web interface with rotating dual arc rings, audio equalizer bars, live status transitions, and real-time comms logging.
+- **🐧 Native Arch Linux & PipeWire Optimization:** Auto-detects 16kHz PipeWire audio sinks/sources and supports seamless Bluetooth headset routing.
 
 ---
 
@@ -50,17 +54,17 @@ jarvis-voice-assistant/
 │   ├── config.py                # Strongly-typed configuration
 │   ├── logger.py                # Colorized structured logger
 │   ├── audio/
-│   │   ├── recorder.py          # VAD microphone stream engine
-│   │   └── player.py            # Low-latency audio player
+│   │   ├── recorder.py          # VAD microphone stream engine (PipeWire auto-detect)
+│   │   └── player.py            # Low-latency audio player (pw-play / paplay / ffplay)
 │   ├── services/
-│   │   ├── stt.py               # Deepgram speech-to-text service
-│   │   ├── llm.py               # Pluggable LLM interface (OpenAI / Fallback)
-│   │   └── tts.py               # Speech synthesis (ElevenLabs / Edge-TTS)
+│   │   ├── stt.py               # Deepgram Nova-2 STT with MP3 compression & Gemini fallback
+│   │   ├── llm.py               # Multi-model Gemini failover & OpenAI integration
+│   │   └── tts.py               # Speech synthesis (Edge-TTS / ElevenLabs)
 │   ├── core/
-│   │   ├── state.py             # Event-driven State Machine
+│   │   ├── state.py             # Event-driven State Machine (Idle, Listening, Processing, Speaking)
 │   │   └── assistant.py         # Main conversation orchestrator
 │   └── web/
-│       └── server.py            # High-performance HTTP/API dashboard
+│       └── server.py            # Zero-dependency Arc Reactor Tactical HUD server
 ├── tests/
 │   └── test_audio.py            # Unit tests
 ├── .env.example                 # Sanitized environment template
@@ -77,7 +81,7 @@ jarvis-voice-assistant/
 ### 1. Prerequisites (Arch Linux)
 Ensure development headers and audio servers are present:
 ```bash
-sudo pacman -S --needed portaudio ffmpeg base-devel
+sudo pacman -S --needed portaudio ffmpeg base-devel pipewire
 ```
 
 ### 2. Installation
@@ -91,39 +95,63 @@ pip install -r requirements.txt
 ```
 
 ### 3. Configuration
-Copy the template and add your credentials:
+Copy the template and configure your keys:
 ```bash
 cp .env.example .env
 nano .env
 ```
 
 ```ini
+# Deepgram (Free speech recognition): https://console.deepgram.com
 DEEPGRAM_API_KEY=your_deepgram_api_key_here
-OPENAI_API_KEY=your_openai_api_key_here
-ELEVENLABS_API_KEY=your_elevenlabs_api_key_here
+
+# Google Gemini (Free AI Studio key, no credit card required): https://aistudio.google.com/apikey
+GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-3.5-flash-lite
+
+# Optional Fallbacks
+OPENAI_API_KEY=
+ELEVENLABS_API_KEY=
 ```
 
 ---
 
 ## 🎮 Usage
 
-### Run Assistant & Web Dashboard (Recommended)
-This starts the voice assistant and automatically spins up the dashboard at `http://localhost:5000`:
+### Run Voice Assistant & Launch Screen
+This launches JARVIS and automatically pops open the Tactical Arc Reactor HUD in your browser:
 ```bash
 python main.py
 ```
 
 ### Command-Line Options
 ```bash
-# Run microphone diagnostic test:
-python main.py --test-mic
+# Run without auto-opening the browser:
+python main.py --no-browser
 
-# Run only the web dashboard:
+# Run only the Tactical Web HUD:
 python main.py --web-only
 
-# Run without the web dashboard:
+# Run headlessly in terminal without web dashboard:
 python main.py --no-web
+
+# Run microphone diagnostic test:
+python main.py --test-mic
 ```
+
+---
+
+## 🧪 Testing
+
+Run automated tests via `pytest`:
+```bash
+pytest tests/
+```
+
+---
+
+## 📜 License
+Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
