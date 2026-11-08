@@ -44,7 +44,7 @@ def test_placeholder_detector():
     assert _is_placeholder("your_api_key_here") is True
     assert _is_placeholder("sk-proj-...") is True
     assert _is_placeholder("sk-...") is True
-    assert _is_placeholder("AIzaSyValidProductionKey123456789") is False
+    assert _is_placeholder("valid_production_api_key_12345") is False
 
 
 def test_echo_fallback_llm():
