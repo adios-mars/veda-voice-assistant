@@ -78,10 +78,26 @@ jarvis-voice-assistant/
 
 ## 🚀 Getting Started
 
-### 1. Prerequisites (Arch Linux)
-Ensure development headers and audio servers are present:
+### 1. Prerequisites by Operating System
+
+#### **Arch Linux / Manjaro:**
 ```bash
 sudo pacman -S --needed portaudio ffmpeg base-devel pipewire
+```
+
+#### **Ubuntu / Debian / Linux Mint / Pop!_OS:**
+```bash
+sudo apt update && sudo apt install -y portaudio19-dev ffmpeg build-essential
+```
+
+#### **Fedora / RHEL:**
+```bash
+sudo dnf install -y portaudio-devel ffmpeg gcc
+```
+
+#### **macOS (via Homebrew):**
+```bash
+brew install portaudio ffmpeg
 ```
 
 ### 2. Installation

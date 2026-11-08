@@ -8,13 +8,14 @@ logger = get_logger("Player")
 
 
 class AudioPlayer:
-    """Dispatches audio output through native Linux audio servers."""
+    """Dispatches audio output through cross-platform audio players."""
 
     COMMANDS = [
-        ["pw-play"],
-        ["paplay"],
-        ["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet"],
-        ["aplay"],
+        ["pw-play"],                                              # Modern Linux (PipeWire)
+        ["paplay"],                                               # Linux (PulseAudio - Ubuntu/Debian)
+        ["afplay"],                                               # macOS Native
+        ["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet"], # Cross-platform (Linux/Windows/macOS)
+        ["aplay"],                                                # Linux ALSA
     ]
 
     @classmethod
