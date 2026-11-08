@@ -71,15 +71,18 @@ class JarvisAssistant:
         with open("conv.txt", "a", encoding="utf-8") as f:
             f.write(f"{reply}\n")
 
-        # Synthesize Speech
+        # Synthesize Speech & Playback (resilient against network glitches)
         response_wav = config.audio.response_path
-        self.tts.synthesize(reply, response_wav)
+        try:
+            result_path = self.tts.synthesize(reply, response_wav)
+            if result_path and Path(result_path).exists() and Path(result_path).stat().st_size > 0:
+                self.state.set_state(AssistantState.SPEAKING)
+                AudioPlayer.play(response_wav)
+        except Exception as tts_err:
+            logger.error(f"Speech synthesis or playback error: {tts_err}")
+        finally:
+            self.state.set_state(AssistantState.IDLE)
 
-        # Playback audio
-        self.state.set_state(AssistantState.SPEAKING)
-        AudioPlayer.play(response_wav)
-
-        self.state.set_state(AssistantState.IDLE)
         return reply
 
     def step(self):

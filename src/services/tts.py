@@ -52,22 +52,45 @@ class ElevenLabsTTS(BaseTTS):
 
 
 class EdgeTTS(BaseTTS):
-    """Free, high-quality neural voice synthesis via Microsoft Edge TTS."""
+    """Free, high-quality neural voice synthesis via Microsoft Edge TTS with auto-retry."""
 
     def __init__(self, voice: Optional[str] = None):
         self.voice = voice or config.edge_tts_voice
 
-    def synthesize(self, text: str, output_path: Union[str, Path]) -> Path:
+    def synthesize(self, text: str, output_path: Union[str, Path]) -> Optional[Path]:
         import edge_tts
         target = Path(output_path)
         temp_mp3 = target.with_suffix(".mp3")
         start = time.perf_counter()
 
-        async def _run():
-            communicate = edge_tts.Communicate(text, self.voice)
-            await communicate.save(str(temp_mp3))
+        success = False
+        last_error = None
 
-        asyncio.run(_run())
+        # Retry up to 3 times to survive momentary DNS/network blips
+        for attempt in range(1, 4):
+            try:
+                async def _run():
+                    communicate = edge_tts.Communicate(text, self.voice)
+                    await communicate.save(str(temp_mp3))
+
+                asyncio.run(_run())
+                success = True
+                break
+            except Exception as e:
+                last_error = e
+                logger.warning(f"Edge-TTS attempt {attempt}/3 failed ({e}). Retrying in {attempt * 0.5}s...")
+                time.sleep(attempt * 0.5)
+
+        if not success:
+            logger.warning(f"Edge-TTS unavailable ({last_error}). Falling back to Google TTS...")
+            try:
+                from gtts import gTTS
+                google_tts = gTTS(text=text, lang="en", tld="com")
+                google_tts.save(str(temp_mp3))
+                success = True
+            except Exception as gtts_err:
+                logger.error(f"Both Edge-TTS and Google TTS failed: {gtts_err}")
+                return None
 
         # Convert MP3 to true standard PCM WAV for native Linux audio servers (PipeWire / ALSA)
         try:
@@ -78,7 +101,7 @@ class EdgeTTS(BaseTTS):
                 stderr=subprocess.DEVNULL,
             )
         except Exception:
-            # Fallback: copy file
+            # Fallback: rename file
             temp_mp3.rename(target)
 
         elapsed = time.perf_counter() - start
