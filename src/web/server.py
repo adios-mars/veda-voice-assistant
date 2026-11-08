@@ -262,7 +262,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </body>
 </html>
 """
-"""
 
 
 class DashboardRequestHandler(SimpleHTTPRequestHandler):
