@@ -84,21 +84,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
           </button>
 
-          <!-- Grid / Capabilities Button -->
-          <button onclick="promptInput.focus()" title="Capabilities" class="w-7 h-7 rounded-lg bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-400 hover:text-white flex items-center justify-center transition">
-            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="7" height="7" rx="1.5"/>
-              <rect x="14" y="3" width="7" height="7" rx="1.5"/>
-              <rect x="14" y="14" width="7" height="7" rx="1.5"/>
-              <rect x="3" y="14" width="7" height="7" rx="1.5"/>
-            </svg>
-          </button>
-
-          <!-- System Indicator Pill -->
-          <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-800/50 text-zinc-300 font-medium">
+          <!-- Companion Status Pill -->
+          <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-800/60 text-zinc-300 font-medium select-none">
             <svg class="w-3.5 h-3.5 text-zinc-400" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-            <span class="text-xs">Veda</span>
-            <span id="companionBadge" class="text-[10px] text-blue-400 font-semibold px-1 py-0.2 rounded bg-blue-500/10 ml-0.5">Live</span>
+            <span class="text-xs font-medium">Companion</span>
+            <span id="companionBadge" class="text-[10px] text-blue-400 font-semibold px-1.5 py-0.5 rounded bg-blue-500/10 ml-0.5 transition">Live</span>
           </div>
         </div>
 
@@ -126,21 +116,21 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       </div>
     </div>
 
-    <!-- Bottom 3 Action Cards (Exact match from reference) -->
+    <!-- Bottom 3 Action Cards (Exact user preference) -->
     <div class="grid grid-cols-3 gap-3">
-      <!-- Card 1: Create -->
-      <div onclick="quickSend('Help me create ')" class="bg-[#17171a] hover:bg-[#202024] border border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between transition cursor-pointer group shadow-sm min-h-[96px]">
+      <!-- Card 1: Talk & Vent -->
+      <div onclick="quickSend('I need someone to talk to and vent a little.')" class="bg-[#17171a] hover:bg-[#202024] border border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between transition cursor-pointer group shadow-sm min-h-[96px]">
         <div class="text-zinc-400 group-hover:text-white mb-3 transition">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
         </div>
         <div>
-          <div class="text-xs font-semibold text-white tracking-tight">Create</div>
-          <div class="text-[11px] text-zinc-400 mt-0.5">Tasks, Images, Docs</div>
+          <div class="text-xs font-semibold text-white tracking-tight">Talk & Vent</div>
+          <div class="text-[11px] text-zinc-400 mt-0.5">Share what is on your mind</div>
         </div>
       </div>
 
-      <!-- Card 2: Find -->
-      <div onclick="quickSend('Help me find answers about ')" class="bg-[#17171a] hover:bg-[#202024] border border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between transition cursor-pointer group shadow-sm min-h-[96px]">
+      <!-- Card 2: Find Solutions -->
+      <div onclick="quickSend('Help me brainstorm a solution to a problem.')" class="bg-[#17171a] hover:bg-[#202024] border border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between transition cursor-pointer group shadow-sm min-h-[96px]">
         <div class="text-zinc-400 group-hover:text-white mb-3 transition">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 8V6a2 2 0 0 1 2-2h2"/>
@@ -151,25 +141,23 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           </svg>
         </div>
         <div>
-          <div class="text-xs font-semibold text-white tracking-tight">Find</div>
-          <div class="text-[11px] text-zinc-400 mt-0.5">Answers & Files</div>
+          <div class="text-xs font-semibold text-white tracking-tight">Find Solutions</div>
+          <div class="text-[11px] text-zinc-400 mt-0.5">Answers, ideas & advice</div>
         </div>
       </div>
 
-      <!-- Card 3: Research -->
-      <div onclick="quickSend('Let\\'s research ')" class="bg-[#17171a] hover:bg-[#202024] border border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between transition cursor-pointer group shadow-sm min-h-[96px]">
+      <!-- Card 3: Ask Anything -->
+      <div onclick="quickSend('I have a question: ')" class="bg-[#17171a] hover:bg-[#202024] border border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between transition cursor-pointer group shadow-sm min-h-[96px]">
         <div class="text-zinc-400 group-hover:text-white mb-3 transition">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"/>
-            <path d="M3 11h16"/>
-            <path d="M11 3a13 13 0 0 0 0 16"/>
-            <path d="M11 3a13 13 0 0 1 0 16"/>
-            <path d="m15 15 5 5m-2-5 2 5-5-2"/>
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
+            <path d="M2 12h20"/>
           </svg>
         </div>
         <div>
-          <div class="text-xs font-semibold text-white tracking-tight">Research</div>
-          <div class="text-[11px] text-zinc-400 mt-0.5">Apps & Web</div>
+          <div class="text-xs font-semibold text-white tracking-tight">Ask Anything</div>
+          <div class="text-[11px] text-zinc-400 mt-0.5">Code, questions & facts</div>
         </div>
       </div>
     </div>

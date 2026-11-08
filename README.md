@@ -63,9 +63,9 @@ flowchart LR
 - Zero-dependency embedded web server running locally on port 5000.
 - Dark theme interface with real-time state visualization (Live, Listening, Thinking, Speaking).
 - Interactive input card with typed message submission, conversation stream, and quick action cards:
-  - Create: Tasks, Images, Docs
-  - Find: Answers & Files
-  - Research: Apps & Web
+  - Talk & Vent: Share what is on your mind
+  - Find Solutions: Answers, ideas & advice
+  - Ask Anything: Code, questions & facts
 
 ---
 
