@@ -87,22 +87,26 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <!-- Ambient Subtle Top Glow -->
     <div class="absolute -top-32 right-1/4 w-96 h-60 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-    <!-- Minimal Header (No SaaS login clutter) -->
+    <!-- Minimal Header with New Conversation Tab -->
     <header class="flex items-center justify-between border-b border-white/[0.06] pb-4 mb-4 shrink-0">
       <div class="flex items-center gap-3">
         <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-teal-400 to-cyan-300 shadow-[0_0_12px_rgba(45,212,191,0.5)] flex items-center justify-center">
           <div class="w-2.5 h-2.5 rounded-full bg-white"></div>
         </div>
-        <span class="font-bold text-base tracking-tight text-white">Syntrix <span class="text-xs text-cyan-400 font-normal">// J.A.R.V.I.S.</span></span>
+        <div>
+          <span class="font-bold text-base tracking-tight text-white">Syntrix <span class="text-xs text-cyan-400 font-normal">// J.A.R.V.I.S.</span></span>
+          <div class="text-[10px] text-slate-400">AI Companion & Problem Solver</div>
+        </div>
       </div>
 
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-3">
         <span id="statusIndicator" class="text-xs font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           Ready
         </span>
-        <button onclick="resetConversation()" class="text-xs font-medium text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 px-3 py-1.5 rounded-xl transition border border-transparent hover:border-rose-500/20">
-          Clear Conversation
+        <button onclick="resetConversation()" class="text-xs font-semibold text-slate-200 hover:text-white bg-[#18202e] hover:bg-[#222c3d] border border-white/[0.1] px-3.5 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm">
+          <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          New Conversation
         </button>
       </div>
     </header>
@@ -113,9 +117,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       <!-- Living Orb Hero (Shown when idle/empty) -->
       <div id="orbHero" class="flex flex-col items-center justify-center my-auto text-center">
         <div class="glass-orb mb-4" id="centralOrb"></div>
-        <div class="text-[11px] font-bold tracking-[0.25em] text-slate-400 uppercase mb-1">Welcome, Ruth</div>
-        <h2 class="text-2xl font-bold tracking-tight text-white mb-2">How can I assist you today?</h2>
-        <p class="text-xs text-slate-400 max-w-md">Speak naturally into your microphone or type a question below.</p>
+        <div class="text-[11px] font-bold tracking-[0.25em] text-slate-400 uppercase mb-1">Your AI Companion</div>
+        <h2 class="text-2xl font-bold tracking-tight text-white mb-2">How may I be of service today, Ma'am?</h2>
+        <p class="text-xs text-slate-400 max-w-md">A loyal friend who listens when you need to talk, and an intelligence ready to solve any problem.</p>
       </div>
 
       <!-- Live Chat Messages -->
@@ -208,7 +212,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             
             if (isUser) {
               bubble.className = 'bg-indigo-950/70 border border-indigo-500/40 rounded-2xl p-3 px-4 text-xs leading-relaxed self-end max-w-lg text-slate-100 shadow-sm';
-              bubble.innerHTML = `<div class="font-bold text-indigo-300 text-[10px] uppercase mb-0.5 tracking-wider">Ruth</div><div>${escapeHtml(msg)}</div>`;
+              bubble.innerHTML = `<div class="font-bold text-indigo-300 text-[10px] uppercase mb-0.5 tracking-wider">You</div><div>${escapeHtml(msg)}</div>`;
             } else {
               bubble.className = 'bg-[#181e2b] border border-white/[0.08] rounded-2xl p-3 px-4 text-xs leading-relaxed self-start max-w-lg text-slate-100 shadow-sm';
               bubble.innerHTML = `<div class="font-bold text-cyan-400 text-[10px] uppercase mb-0.5 tracking-wider">J.A.R.V.I.S.</div><div>${escapeHtml(msg)}</div>`;
