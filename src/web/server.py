@@ -15,147 +15,137 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Syntrix // J.A.R.V.I.S.</title>
+  <title>Veda // Here to listen, ready to help</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { font-family: 'Plus Jakarta Sans', sans-serif; }
     
-    /* 3D Iridescent Glass Sphere */
-    .glass-orb {
-      width: 78px;
-      height: 78px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 32% 28%, #ffffff 0%, #38ef7d 22%, #11998e 45%, #0284c7 72%, #0f172a 100%);
-      box-shadow: 
-        inset 0 0 15px rgba(255, 255, 255, 0.8),
-        inset 0 -8px 18px rgba(2, 132, 199, 0.7),
-        0 10px 30px rgba(17, 153, 142, 0.45),
-        0 0 45px rgba(56, 239, 125, 0.3);
-      position: relative;
-      animation: orbFloat 4s ease-in-out infinite;
-      transition: all 0.4s ease;
+    .mic-active {
+      color: #38bdf8 !important;
+      animation: micPulse 1.2s ease-in-out infinite;
     }
-    .glass-orb::before {
-      content: '';
-      position: absolute;
-      top: 10px;
-      left: 14px;
-      width: 24px;
-      height: 14px;
-      border-radius: 50%;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0) 100%);
-      transform: rotate(-25deg);
+    @keyframes micPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.25); opacity: 0.7; }
     }
 
-    @keyframes orbFloat {
-      0%, 100% { transform: translateY(0px) scale(1); }
-      50% { transform: translateY(-6px) scale(1.02); }
-    }
-
-    .orb-listening {
-      box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7), 0 0 45px rgba(56, 189, 248, 0.7) !important;
-      animation: listeningPulse 1.3s ease-out infinite !important;
-    }
-    @keyframes listeningPulse {
-      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.8); }
-      70% { transform: scale(1.08); box-shadow: 0 0 0 20px rgba(56, 189, 248, 0); }
-      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
-    }
-
-    .orb-processing {
-      background: radial-gradient(circle at 32% 28%, #ffffff 0%, #fbbf24 22%, #d97706 45%, #78350f 72%, #0f172a 100%) !important;
-      box-shadow: 0 0 40px rgba(245, 158, 11, 0.6) !important;
-    }
-
-    .orb-speaking {
-      background: radial-gradient(circle at 32% 28%, #ffffff 0%, #f43f5e 22%, #e11d48 45%, #881337 72%, #0f172a 100%) !important;
-      box-shadow: 0 0 45px rgba(244, 63, 94, 0.6) !important;
-    }
-
-    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 4px; }
   </style>
 </head>
-<body class="bg-[#080b11] text-slate-100 min-h-screen flex items-center justify-center p-6 antialiased selection:bg-cyan-500/30">
+<body class="bg-[#0e0e11] text-slate-100 min-h-screen flex items-center justify-center p-4 antialiased selection:bg-blue-500/30">
   
-  <!-- Clean Floating Container (No fake login, no dead cards) -->
-  <div class="w-full max-w-4xl rounded-[32px] bg-[#0c1017] border border-white/[0.08] shadow-[0_30px_90px_-20px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col h-[680px] p-7 relative">
-    
-    <!-- Ambient Subtle Top Glow -->
-    <div class="absolute -top-32 right-1/4 w-96 h-60 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
+  <!-- Outer Minimalist Card (Matching user reference) -->
+  <div class="w-full max-w-2xl flex flex-col justify-between py-6 px-3 min-h-[560px]">
 
-    <!-- Minimal Header with New Conversation Tab -->
-    <header class="flex items-center justify-between border-b border-white/[0.06] pb-4 mb-4 shrink-0">
-      <div class="flex items-center gap-3">
-        <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-teal-400 to-cyan-300 shadow-[0_0_12px_rgba(45,212,191,0.5)] flex items-center justify-center">
-          <div class="w-2.5 h-2.5 rounded-full bg-white"></div>
-        </div>
-        <div>
-          <span class="font-bold text-base tracking-tight text-white">Syntrix <span class="text-xs text-cyan-400 font-normal">// J.A.R.V.I.S.</span></span>
-          <div class="text-[10px] text-slate-400">AI Companion & Problem Solver</div>
-        </div>
+    <!-- Top Brand Header -->
+    <div class="flex flex-col items-center justify-center text-center mb-6">
+      <div class="flex items-center gap-2.5 mb-1.5">
+        <svg class="w-5 h-5 text-slate-200" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+        </svg>
+        <h1 class="text-2xl font-bold text-white tracking-tight">Veda</h1>
       </div>
+      <p class="text-xs text-slate-400">Here to listen, ready to help</p>
+    </div>
 
-      <div class="flex items-center gap-3">
-        <span id="statusIndicator" class="text-xs font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          Ready
-        </span>
-        <button onclick="resetConversation()" class="text-xs font-semibold text-slate-200 hover:text-white bg-[#18202e] hover:bg-[#222c3d] border border-white/[0.1] px-3.5 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm">
-          <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-          New Conversation
-        </button>
-      </div>
-    </header>
+    <!-- Conversation Stream (Displays live messages) -->
+    <div id="chatStream" class="flex-1 flex flex-col gap-3.5 overflow-y-auto max-h-64 mb-4 px-1 hidden scroll-smooth">
+    </div>
 
-    <!-- Center Content / Conversation Stream -->
-    <main class="flex-1 overflow-y-auto flex flex-col justify-between py-2" id="mainContainer">
-      
-      <!-- Living Orb Hero (Shown when idle/empty) -->
-      <div id="orbHero" class="flex flex-col items-center justify-center my-auto text-center">
-        <div class="glass-orb mb-4" id="centralOrb"></div>
-        <div class="text-[11px] font-bold tracking-[0.25em] text-slate-400 uppercase mb-1">Your AI Companion</div>
-        <h2 class="text-2xl font-bold tracking-tight text-white mb-2">How may I be of service today, Ma'am?</h2>
-        <p class="text-xs text-slate-400 max-w-md">A loyal friend who listens when you need to talk, and an intelligence ready to solve any problem.</p>
-      </div>
-
-      <!-- Live Chat Messages -->
-      <div id="chatStreamView" class="hidden flex-col gap-3.5 overflow-y-auto pr-2 my-auto max-h-[460px] scroll-smooth">
-      </div>
-    </main>
-
-    <!-- Working Input Bar (Voice + Typing) -->
-    <footer class="mt-4 shrink-0">
-      <div class="bg-[#141a24] border border-white/[0.08] rounded-2xl p-2.5 px-4 flex items-center gap-3 shadow-2xl focus-within:border-cyan-500/40 transition">
-        <span class="text-cyan-400 text-sm">✦</span>
-        <input 
+    <!-- Main Central Input Card (Exact styling from reference) -->
+    <div class="bg-[#18181b] border border-white/[0.08] rounded-[26px] p-4 shadow-2xl transition focus-within:border-white/20 mb-5">
+      <!-- Input Text Area -->
+      <div class="mb-3 px-1">
+        <textarea 
           id="promptInput" 
-          type="text" 
-          placeholder="Ask me anything... (or speak into your microphone)" 
-          class="w-full bg-transparent border-none outline-none text-xs text-white placeholder-slate-400"
-          onkeydown="if(event.key==='Enter') handleSendText()"
-        />
-        <div class="flex items-center gap-2.5 shrink-0">
-          <div id="voicePill" class="flex items-center gap-1.5 text-[11px] text-slate-300 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.06]">
-            <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
-            <span id="voiceStatusText">Voice (Ready)</span>
+          rows="2" 
+          placeholder="Ask anything..." 
+          class="w-full bg-transparent border-none outline-none resize-none text-sm text-slate-100 placeholder-slate-400 leading-relaxed"
+          onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); handleSendText(); }"
+        ></textarea>
+      </div>
+
+      <!-- Bottom Card Toolbar -->
+      <div class="flex items-center justify-between pt-2.5 border-t border-white/[0.06] text-xs">
+        <!-- Left tools -->
+        <div class="flex items-center gap-2">
+          <button onclick="resetConversation()" title="New Chat / Clear" class="w-7 h-7 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-slate-300 flex items-center justify-center transition">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.04] text-slate-300 font-medium">
+            <svg class="w-3.5 h-3.5 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            <span>Companion</span>
+            <span id="companionBadge" class="text-[10px] text-blue-400 font-semibold px-1 py-0.2 rounded bg-blue-500/10 ml-0.5">Live</span>
           </div>
-          <button onclick="handleSendText()" class="w-8 h-8 rounded-full bg-white hover:bg-slate-200 text-slate-900 flex items-center justify-center text-xs font-bold transition shadow-md">
-            ➤
+        </div>
+
+        <!-- Right model selector, Mic & Send button -->
+        <div class="flex items-center gap-2.5">
+          <div class="flex items-center gap-1 text-slate-300 hover:text-white px-2.5 py-1 rounded-lg bg-white/[0.04] cursor-pointer">
+            <span class="text-amber-400 text-xs">✱</span>
+            <span class="text-xs font-medium">Gemini 3.5</span>
+            <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          
+          <!-- Mic status indicator -->
+          <div id="micIcon" class="text-slate-400 p-1 transition" title="Microphone Listening">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+          </div>
+
+          <!-- Circular Blue Send Button (Exact match: blue with white up arrow) -->
+          <button onclick="handleSendText()" class="w-7 h-7 rounded-full bg-[#0084ff] hover:bg-blue-600 text-white flex items-center justify-center transition shadow-md shadow-blue-500/30 font-bold">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
           </button>
         </div>
       </div>
-    </footer>
+    </div>
+
+    <!-- Bottom 3 Action Cards (Exact match from reference) -->
+    <div class="grid grid-cols-3 gap-3">
+      <!-- Card 1: Create -->
+      <div onclick="quickSend('I need someone to talk to.')" class="bg-[#18181b] hover:bg-[#202024] border border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between transition cursor-pointer group shadow-sm min-h-[92px]">
+        <div class="text-slate-400 group-hover:text-white mb-2 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-white">Talk & Vent</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">Share what is on your mind</div>
+        </div>
+      </div>
+
+      <!-- Card 2: Find -->
+      <div onclick="quickSend('Help me brainstorm a solution to a problem.')" class="bg-[#18181b] hover:bg-[#202024] border border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between transition cursor-pointer group shadow-sm min-h-[92px]">
+        <div class="text-slate-400 group-hover:text-white mb-2 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-white">Find Solutions</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">Answers, ideas & advice</div>
+        </div>
+      </div>
+
+      <!-- Card 3: Research -->
+      <div onclick="quickSend('Give me a quick system check.')" class="bg-[#18181b] hover:bg-[#202024] border border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between transition cursor-pointer group shadow-sm min-h-[92px]">
+        <div class="text-slate-400 group-hover:text-white mb-2 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-white">Ask Anything</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">Code, questions & facts</div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
     let cachedJson = "";
-    const orb = document.getElementById('centralOrb');
-    const statusIndicator = document.getElementById('statusIndicator');
-    const voiceStatusText = document.getElementById('voiceStatusText');
+    const micIcon = document.getElementById('micIcon');
+    const promptInput = document.getElementById('promptInput');
+    const companionBadge = document.getElementById('companionBadge');
 
     async function syncState() {
       try {
@@ -164,45 +154,37 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         
         const rawStatus = (data.status || 'Idle').toLowerCase();
         
-        orb.className = 'glass-orb';
+        // Update mic & status
         if (rawStatus.includes('listen')) {
-          orb.classList.add('orb-listening');
-          statusIndicator.innerText = 'Listening...';
-          statusIndicator.className = 'text-xs font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-3 py-1 rounded-full flex items-center gap-2';
-          voiceStatusText.innerText = 'Listening...';
+          micIcon.classList.add('mic-active');
+          companionBadge.innerText = 'Listening';
+          companionBadge.className = 'text-[10px] text-cyan-400 font-semibold px-1 py-0.2 rounded bg-cyan-500/10 ml-0.5 animate-pulse';
         } else if (rawStatus.includes('process')) {
-          orb.classList.add('orb-processing');
-          statusIndicator.innerText = 'Thinking...';
-          statusIndicator.className = 'text-xs font-mono text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full flex items-center gap-2';
-          voiceStatusText.innerText = 'Thinking...';
+          micIcon.classList.remove('mic-active');
+          companionBadge.innerText = 'Thinking';
+          companionBadge.className = 'text-[10px] text-amber-400 font-semibold px-1 py-0.2 rounded bg-amber-500/10 ml-0.5';
         } else if (rawStatus.includes('speak')) {
-          orb.classList.add('orb-speaking');
-          statusIndicator.innerText = 'Speaking...';
-          statusIndicator.className = 'text-xs font-mono text-rose-400 bg-rose-500/10 border border-rose-500/20 px-3 py-1 rounded-full flex items-center gap-2';
-          voiceStatusText.innerText = 'Speaking...';
+          micIcon.classList.remove('mic-active');
+          companionBadge.innerText = 'Speaking';
+          companionBadge.className = 'text-[10px] text-rose-400 font-semibold px-1 py-0.2 rounded bg-rose-500/10 ml-0.5';
         } else {
-          statusIndicator.innerText = 'Ready';
-          statusIndicator.className = 'text-xs font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full flex items-center gap-2';
-          voiceStatusText.innerText = 'Voice (Ready)';
+          micIcon.classList.remove('mic-active');
+          companionBadge.innerText = 'Live';
+          companionBadge.className = 'text-[10px] text-blue-400 font-semibold px-1 py-0.2 rounded bg-blue-500/10 ml-0.5';
         }
 
         // Render conversation
         const jsonStr = JSON.stringify(data.conversation);
         if (jsonStr !== cachedJson) {
           cachedJson = jsonStr;
-          const streamView = document.getElementById('chatStreamView');
-          const heroView = document.getElementById('orbHero');
+          const streamView = document.getElementById('chatStream');
 
           if (!data.conversation || data.conversation.length === 0) {
             streamView.classList.add('hidden');
-            streamView.classList.remove('flex');
-            heroView.classList.remove('hidden');
             return;
           }
 
-          heroView.classList.add('hidden');
           streamView.classList.remove('hidden');
-          streamView.classList.add('flex');
           streamView.innerHTML = '';
 
           data.conversation.forEach((msg, idx) => {
@@ -211,11 +193,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             const isUser = (idx % 2 === 0);
             
             if (isUser) {
-              bubble.className = 'bg-indigo-950/70 border border-indigo-500/40 rounded-2xl p-3 px-4 text-xs leading-relaxed self-end max-w-lg text-slate-100 shadow-sm';
-              bubble.innerHTML = `<div class="font-bold text-indigo-300 text-[10px] uppercase mb-0.5 tracking-wider">You</div><div>${escapeHtml(msg)}</div>`;
+              bubble.className = 'bg-[#27272a] border border-white/[0.06] rounded-2xl p-3 px-4 text-xs leading-relaxed self-end max-w-lg text-slate-100 shadow-sm';
+              bubble.innerHTML = `<div class="font-bold text-slate-400 text-[10px] uppercase mb-0.5 tracking-wider">You</div><div>${escapeHtml(msg)}</div>`;
             } else {
-              bubble.className = 'bg-[#181e2b] border border-white/[0.08] rounded-2xl p-3 px-4 text-xs leading-relaxed self-start max-w-lg text-slate-100 shadow-sm';
-              bubble.innerHTML = `<div class="font-bold text-cyan-400 text-[10px] uppercase mb-0.5 tracking-wider">J.A.R.V.I.S.</div><div>${escapeHtml(msg)}</div>`;
+              bubble.className = 'bg-[#18181b] border border-white/[0.08] rounded-2xl p-3 px-4 text-xs leading-relaxed self-start max-w-lg text-slate-100 shadow-sm';
+              bubble.innerHTML = `<div class="font-bold text-cyan-400 text-[10px] uppercase mb-0.5 tracking-wider">Veda</div><div>${escapeHtml(msg)}</div>`;
             }
             streamView.appendChild(bubble);
           });
@@ -239,11 +221,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }
 
     async function handleSendText() {
-      const input = document.getElementById('promptInput');
-      const val = input.value.trim();
+      const val = promptInput.value.trim();
       if (!val) return;
 
-      input.value = '';
+      promptInput.value = '';
       try {
         await fetch('/api/chat', {
           method: 'POST',
@@ -254,6 +235,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       } catch (err) {
         console.error('Send error:', err);
       }
+    }
+
+    function quickSend(text) {
+      promptInput.value = text;
+      handleSendText();
     }
 
     setInterval(syncState, 350);
