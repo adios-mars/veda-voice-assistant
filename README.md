@@ -37,35 +37,15 @@ flowchart LR
 
 ## Core Engineering Features
 
-### Resilient Multi-Tier LLM Orchestration
-- Powered primarily by Google Gemini (`gemini-3.5-flash-lite`) via Google AI Studio free tier.
-- Automatic failover pool transitions (`gemini-3.5-flash-lite` -> `gemini-3.1-flash-lite` -> `gemma-4-26b-a4b-it` -> `gemini-2.5-flash`) when encountering HTTP 429 quota exhaustion or HTTP 503 service unavailability.
-- Pre-synthesis text sanitization strips markdown syntax characters to maintain clear, lifelike neural cadence.
+Never-Fail AI Brain: Uses Gemini Flash-Lite with automatic backups across four alternate models to prevent rate limits and downtime.
 
-### Pre-Upload Audio Compression
-- Audio frames captured by PyAudio are compressed from 16kHz raw PCM WAV into 32kbps MP3 via `ffmpeg` prior to cloud transmission.
-- Reduces upload payload volume by over 85%, eliminating write timeouts and slow upload errors on unstable networks.
+Lightweight Audio: Compresses microphone input to 32kbps MP3 on the fly, cutting upload bandwidth by 85% on flaky connections.
 
-### Dual-Engine Speech-to-Text (STT)
-- Primary transcription via Deepgram Nova-2 with a strict 5-second network deadline.
-- Automatic secondary fallback routes compressed audio to Google Gemini Multimodal Audio transcription in the event of upstream network disruption.
+Backup-Ready Speech & Voice: Transcribes via Deepgram (backed by Gemini Audio) and speaks via Edge-TTS (backed by gTTS).
 
-### Fault-Tolerant Neural Speech Synthesis (TTS)
-- Primary voice generation via Microsoft Edge-TTS neural engine (`en-US-ChristopherNeural`), converted directly to PCM WAV for native Linux audio servers.
-- Exponential backoff retry mechanism (3 attempts) handles transient DNS or transport drops.
-- Secondary fallback to Google Text-to-Speech (`gTTS`) ensures continuous voice response capability without system termination.
+Smart Audio Routing: Automatically detects Linux audio servers (PipeWire, PulseAudio, ALSA) and Bluetooth headsets.
 
-### Native Linux and Cross-Platform Audio Routing
-- Dedicated audio sink dispatcher automatically detects and prioritizes PipeWire (`pw-play`), PulseAudio (`paplay`), macOS native (`afplay`), ALSA (`aplay`), or FFplay (`ffplay`).
-- Automatic detection of 16kHz audio input sources with native Bluetooth headset routing.
-
-### Ultra-Minimalist Web Interface
-- Zero-dependency embedded web server running locally on port 5000.
-- Dark theme interface with real-time state visualization (Live, Listening, Thinking, Speaking).
-- Interactive input card with typed message submission, conversation stream, and quick action cards:
-  - Talk & Vent: Share what is on your mind
-  - Find Solutions: Answers, ideas & advice
-  - Ask Anything: Code, questions & facts
+Clean Local UI: A lightweight web dashboard on port 5000 showing real-time states (listening, thinking, speaking) with quick chat prompts.
 
 ---
 
@@ -189,30 +169,4 @@ python main.py --no-web
 python main.py --test-mic
 ```
 
----
 
-## Quality Assurance and Testing
-
-Execute the test suite using `pytest`:
-```bash
-pytest tests/
-```
-
-Run linting checks:
-```bash
-flake8 src/ tests/
-```
-
----
-
-## Security and Privacy Notice
-
-- API keys and environment configurations are excluded from version control via `.gitignore`.
-- Recorded audio files (`recording.wav`, `recording.mp3`) and synthesized speech files are stored in `audio/` and excluded from repository commits.
-- No personal user audio is retained on external servers beyond the lifetime of individual transcription and synthesis API requests.
-
----
-
-## License
-
-Distributed under the terms of the MIT License. See `LICENSE` for details.
